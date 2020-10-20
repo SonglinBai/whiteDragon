@@ -200,4 +200,4 @@ saveGraph(GraphA, "./test.json")
 
 
 
-# sys.exit(app.exec_())
+sys.exit(app.exec_())

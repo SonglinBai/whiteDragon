@@ -68,6 +68,32 @@ class Nodz(QtWidgets.QGraphicsView):
         # Display options.
         self.currentState = 'DEFAULT'
         self.pressedKeys = list()
+        self.createContextMenu()
+
+    def createContextMenu(self):
+        self.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
+
+        # 创建QMenu
+        self.contextMenu = QtWidgets.QMenu(self)
+        self.actionA = self.contextMenu.addAction(u'添加')
+        self.actionB = self.contextMenu.addAction(u'删除')
+        # 将动作与处理函数相关联
+        # 这里为了简单，将所有action与同一个处理函数相关联，
+        # 当然也可以将他们分别与不同函数关联，实现不同的功能
+        self.actionA.triggered.connect(self.actionHandler)
+        self.actionB.triggered.connect(self.actionHandler)
+
+    def showContextMenu(self, pos):
+        '''''
+        右键点击时调用的函数
+        '''
+        # 菜单显示前，将它移动到鼠标点击的位置
+        self.contextMenu.move(QtGui.QCursor().pos())
+        self.contextMenu.show()
+
+    def actionHandler(self):
+        print('handler')
 
     def wheelEvent(self, event):
         """

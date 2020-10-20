@@ -75,15 +75,6 @@
                     "preset": "attr_preset_3",
                     "socket": false,
                     "socketMaxConnections": 1
-                },
-                {
-                    "dataType": "<class 'int'>",
-                    "name": "Cattr8",
-                    "plug": true,
-                    "plugMaxConnections": -1,
-                    "preset": "attr_preset_3",
-                    "socket": false,
-                    "socketMaxConnections": 1
                 }
             ],
             "position": [
