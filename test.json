@@ -1,0 +1,176 @@
+{
+    "NAME": "GraphA",
+    "NODES": [
+        {
+            "label": "nodeA",
+            "type": 0,
+            "port": [
+                8086
+            ],
+            "attemp": [],
+            "position": [
+                899.0,
+                986.5
+            ]
+        },
+        {
+            "label": "nodeB",
+            "type": 1,
+            "port": [
+                1123
+            ],
+            "attemp": [
+                {
+                    "label": "B(v0)",
+                    "vulneList": [
+                        "CVE-1"
+                    ],
+                    "requestPermission": 1,
+                    "prob": 0.5,
+                    "result": 1
+                },
+                {
+                    "label": "B(v1)",
+                    "vulneList": [
+                        "CVE-2"
+                    ],
+                    "requestPermission": 0,
+                    "prob": 0.2,
+                    "result": 1
+                }
+            ],
+            "position": [
+                899.0,
+                986.5
+            ]
+        },
+        {
+            "label": "nodeC",
+            "type": 0,
+            "port": [
+                2222
+            ],
+            "attemp": [
+                {
+                    "label": "C(v0)",
+                    "vulneList": [
+                        "CVE-3"
+                    ],
+                    "requestPermission": 0,
+                    "prob": 0.1,
+                    "result": 1
+                },
+                {
+                    "label": "C(v1)",
+                    "vulneList": [
+                        "CVE-4"
+                    ],
+                    "requestPermission": 1,
+                    "prob": 0.3,
+                    "result": 2
+                },
+                {
+                    "label": "C(v2)",
+                    "vulneList": [
+                        "CVE-5"
+                    ],
+                    "requestPermission": 2,
+                    "prob": 0.7,
+                    "result": 3
+                }
+            ],
+            "position": [
+                899.0,
+                986.5
+            ]
+        },
+        {
+            "label": "nodeD",
+            "type": 1,
+            "port": [
+                2231
+            ],
+            "attemp": [
+                {
+                    "label": "D(v0)",
+                    "vulneList": [
+                        "CVE-6"
+                    ],
+                    "requestPermission": 0,
+                    "prob": 0.4,
+                    "result": 0
+                }
+            ],
+            "position": [
+                899.0,
+                986.5
+            ]
+        },
+        {
+            "label": "nodeE",
+            "type": 1,
+            "port": [
+                3112
+            ],
+            "attemp": [
+                {
+                    "label": "E(v0)",
+                    "vulneList": [
+                        "CVE-7"
+                    ],
+                    "requestPermission": 0,
+                    "prob": 0.2,
+                    "result": 0
+                }
+            ],
+            "position": [
+                899.0,
+                986.5
+            ]
+        },
+        {
+            "label": "nodeF",
+            "type": 2,
+            "port": [
+                4445
+            ],
+            "attemp": [
+                {
+                    "label": "F(v0)",
+                    "vulneList": [
+                        "CVE-8"
+                    ],
+                    "requestPermission": 0,
+                    "prob": 0.9,
+                    "result": 0
+                }
+            ],
+            "position": [
+                899.0,
+                986.5
+            ]
+        }
+    ],
+    "CONNECTION": {
+        "nodeA": [
+            "nodeB",
+            "nodeC",
+            "nodeD"
+        ],
+        "nodeB": [
+            "nodeC",
+            "nodeE"
+        ],
+        "nodeC": [
+            "nodeE"
+        ],
+        "nodeD": [
+            "nodeC",
+            "nodeF"
+        ],
+        "nodeE": [
+            "nodeF"
+        ],
+        "nodeF": []
+    }
+}

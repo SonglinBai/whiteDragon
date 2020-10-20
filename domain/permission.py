@@ -9,9 +9,11 @@ class permission(object):
         self.RoadList = []
 
 
-    def toString(self):
+    def toJson(self):
         data = {
             "permissionTable": self.permissionTable,
-            "attackRoadList" =
+            "attackRoadList" : self.AttackRoadList,
+            "attackedRoadList": self.AttackedRoadList,
+            "roadList": self.RoadList
         }
 

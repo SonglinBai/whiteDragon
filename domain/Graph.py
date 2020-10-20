@@ -144,6 +144,21 @@ class Graph(object):
 
         return True
 
+    def toJson(self):
+        connection = dict()
+        for cn in self.AttackTable.keys():
+            connection[cn.label] = []
+            for node in self.AttackTable[cn]:
+                connection[cn.label].append(node.label)
+        data = {
+            "NAME": self.name,
+            "NODES": [],
+            "CONNECTION": connection
+        }
+        for node in self.__nodeList:
+            data["NODES"].append(node.toJson())
+
+        return data
 
 
 
@@ -179,42 +194,43 @@ class Graph(object):
 
 
 
-#以下为测试数据
-GraphA = Graph('GraphA')
-#建立攻击模版
-aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
-bAttempV0 = Attemp('B(v0)', ['CVE-1'], 1, 1, 0.5)
-bAttempV1 = Attemp('B(v1)', ['CVE-2'], 0, 1, 0.2)
-cAttempV0 = Attemp('C(v0)', ['CVE-3'], 0, 1, 0.1)
-cAttempV1 = Attemp('C(v1)', ['CVE-4'], 1, 2, 0.3)
-cAttempV2 = Attemp('C(v2)', ['CVE-5'], 2, 3, 0.7)
-dAttempV0 = Attemp('D(v0)', ['CVE-6'], 0, 0, 0.4)
-eAttempV0 = Attemp('E(v0)', ['CVE-7'], 0, 0, 0.2)
-fAttempV0 = Attemp('F(v0)', ['CVE-8'], 0, 0, 0.9)
 
-#建立点：
-Anode = Node('nodeA',0,[8086],[])
-Bnode = Node('nodeB',1,[1123],[bAttempV0,bAttempV1])
-Cnode = Node('nodeC',0,[2222],[cAttempV0,cAttempV1,cAttempV2])
-Dnode = Node('nodeD',1,[2231],[dAttempV0])
-Enode = Node('nodeE',1,[3112],[eAttempV0])
-Fnode = Node('nodeF',2,[4445],[fAttempV0])
-GraphA.setNodeList([Anode,Bnode,Cnode,Dnode,Enode,Fnode])
-
-#建立邻接多重表
-GraphA.AttackTable = {
-    Anode:[Bnode,Cnode,Dnode],
-    Bnode:[Cnode,Enode],
-    Cnode:[Enode],
-    Dnode:[Cnode,Fnode],
-    Enode:[Fnode],
-    Fnode:[]
-}
-
-road = DoubleList()
-road.append([Anode,aAttempV0])
-GraphA.CoreAlgorithm(Anode,road)
-print(GraphA.AllRoad.ListNumber)
-for i in GraphA.AllRoad.ListGroup:
-    i.travel()
-    print(i.head.data[0])
+# #以下为测试数据
+# GraphA = Graph('GraphA')
+# #建立攻击模版
+# aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
+# bAttempV0 = Attemp('B(v0)', ['CVE-1'], 1, 1, 0.5)
+# bAttempV1 = Attemp('B(v1)', ['CVE-2'], 0, 1, 0.2)
+# cAttempV0 = Attemp('C(v0)', ['CVE-3'], 0, 1, 0.1)
+# cAttempV1 = Attemp('C(v1)', ['CVE-4'], 1, 2, 0.3)
+# cAttempV2 = Attemp('C(v2)', ['CVE-5'], 2, 3, 0.7)
+# dAttempV0 = Attemp('D(v0)', ['CVE-6'], 0, 0, 0.4)
+# eAttempV0 = Attemp('E(v0)', ['CVE-7'], 0, 0, 0.2)
+# fAttempV0 = Attemp('F(v0)', ['CVE-8'], 0, 0, 0.9)
+#
+# #建立点：
+# Anode = Node('nodeA',0,[8086],[])
+# Bnode = Node('nodeB',1,[1123],[bAttempV0,bAttempV1])
+# Cnode = Node('nodeC',0,[2222],[cAttempV0,cAttempV1,cAttempV2])
+# Dnode = Node('nodeD',1,[2231],[dAttempV0])
+# Enode = Node('nodeE',1,[3112],[eAttempV0])
+# Fnode = Node('nodeF',2,[4445],[fAttempV0])
+# GraphA.setNodeList([Anode,Bnode,Cnode,Dnode,Enode,Fnode])
+#
+# #建立邻接多重表
+# GraphA.AttackTable = {
+#     Anode:[Bnode,Cnode,Dnode],
+#     Bnode:[Cnode,Enode],
+#     Cnode:[Enode],
+#     Dnode:[Cnode,Fnode],
+#     Enode:[Fnode],
+#     Fnode:[]
+# }
+#
+# road = DoubleList()
+# road.append([Anode,aAttempV0])
+# GraphA.CoreAlgorithm(Anode,road)
+# print(GraphA.AllRoad.ListNumber)
+# for i in GraphA.AllRoad.ListGroup:
+#     i.travel()
+#     print(i.head.data[0])

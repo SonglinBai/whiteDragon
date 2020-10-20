@@ -62,5 +62,7 @@ GraphA.AttackTable = {
 
 CoreAlgorithm(GraphA,Anode)
 
-for node in GraphA.ShowNodeList():
-    print(node.toString())
+# for node in GraphA.ShowNodeList():
+#     print(node.toJson())
+
+print(GraphA.toJson())

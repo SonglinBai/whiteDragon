@@ -8,7 +8,7 @@ class Attemp(object):
         self.label = label#漏洞的名字
         self.result = result#漏洞造成的影响
 
-    def toString(self):
+    def toJson(self):
         data = {
             "label": self.label,
             "vulneList": self.valueList,

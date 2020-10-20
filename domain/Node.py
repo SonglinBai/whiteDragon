@@ -12,16 +12,15 @@ class Node(object):
         self.permission = permission({},[],[]) #权限表 权限表默认创建时为空
 
 
-    def toString(self):
+    def toJson(self):
         data = {
             "label": self.label,
             "type": self.type,
             "port": self.port,
             "attemp": [],
-            "permission": self.permission
         }
         for attemp in self.Attemp:
-            data["attemp"].append(attemp.toString())
+            data["attemp"].append(attemp.toJson())
 
         return data
 
