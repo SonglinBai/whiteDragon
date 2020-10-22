@@ -19,6 +19,8 @@ class Nodz(QtWidgets.QGraphicsView):
     different user interactions.
 
     """
+    signal_AddNode = QtCore.Signal(int)
+    signal_DeleteNode = QtCore.Signal(int)
 
     signal_NodeCreated = QtCore.Signal(object)
     signal_NodeDeleted = QtCore.Signal(object)
@@ -76,13 +78,13 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # 创建QMenu
         self.contextMenu = QtWidgets.QMenu(self)
-        self.actionA = self.contextMenu.addAction(u'添加')
-        self.actionB = self.contextMenu.addAction(u'删除')
+        self.actionA = self.contextMenu.addAction(u'添加结点')
+        self.actionB = self.contextMenu.addAction(u'删除结点')
         # 将动作与处理函数相关联
         # 这里为了简单，将所有action与同一个处理函数相关联，
         # 当然也可以将他们分别与不同函数关联，实现不同的功能
-        self.actionA.triggered.connect(self.actionHandler)
-        self.actionB.triggered.connect(self.actionHandler)
+        self.actionA.triggered.connect(self.addNodeHandler)
+        self.actionB.triggered.connect(self.DeleteNodeHandler)
 
     def showContextMenu(self, pos):
         '''''
@@ -92,8 +94,15 @@ class Nodz(QtWidgets.QGraphicsView):
         self.contextMenu.move(QtGui.QCursor().pos())
         self.contextMenu.show()
 
-    def actionHandler(self):
-        print('handler')
+
+    def addNodeHandler(self):
+        print('addNode')
+        self.signal_AddNode.emit(1)
+
+    def DeleteNodeHandler(self):
+        print('deleteNode')
+        self.signal_DeleteNode.emit(2)
+
 
     def wheelEvent(self, event):
         """
@@ -120,13 +129,19 @@ class Nodz(QtWidgets.QGraphicsView):
 
         """
         # Tablet zoom
-        if (event.button() == QtCore.Qt.RightButton and
-            event.modifiers() == QtCore.Qt.AltModifier):
+        if event.button() == QtCore.Qt.RightButton:
+            print('right')
             self.currentState = 'ZOOM_VIEW'
             self.initMousePos = event.pos()
-            self.zoomInitialPos = event.pos()
+            #self.zoomInitialPos = event.pos()
             self.initMouse = QtGui.QCursor.pos()
             self.setInteractive(False)
+
+            #test
+
+
+            #test
+
 
 
         # Drag view
@@ -135,6 +150,7 @@ class Nodz(QtWidgets.QGraphicsView):
             self.prevPos = event.pos()
             self.setCursor(QtCore.Qt.ClosedHandCursor)
             self.setInteractive(False)
+            print('mide')
 
 
         # Rubber band selection
@@ -144,6 +160,7 @@ class Nodz(QtWidgets.QGraphicsView):
             self.currentState = 'SELECTION'
             self._initRubberband(event.pos())
             self.setInteractive(False)
+            print('left')
 
 
         # Drag Item
@@ -152,6 +169,7 @@ class Nodz(QtWidgets.QGraphicsView):
               self.scene().itemAt(self.mapToScene(event.pos()), QtGui.QTransform()) is not None):
             self.currentState = 'DRAG_ITEM'
             self.setInteractive(True)
+            print('else')
 
 
         # Add selection
@@ -191,7 +209,8 @@ class Nodz(QtWidgets.QGraphicsView):
         """
         # Zoom.
         if self.currentState == 'ZOOM_VIEW':
-            offset = self.zoomInitialPos.x() - event.pos().x()
+           pass
+           ''' offset = self.zoomInitialPos.x() - event.pos().x()
 
             if offset > self.previousMouseOffset:
                 self.previousMouseOffset = offset
@@ -224,7 +243,7 @@ class Nodz(QtWidgets.QGraphicsView):
 
             self.setTransformationAnchor(QtWidgets.QGraphicsView.NoAnchor)
             self.translate(diff.x(), diff.y())
-
+'''
         # Drag canvas.
         elif self.currentState == 'DRAG_VIEW':
             offset = self.prevPos - event.pos()
@@ -444,7 +463,7 @@ class Nodz(QtWidgets.QGraphicsView):
         selected_nodes = list()
         if self.scene().selectedItems():
             for node in self.scene().selectedItems():
-                selected_nodes.append(node.name)
+                selected_nodes.append(node)
 
         # Emit signal.
         self.signal_NodeSelected.emit(selected_nodes)
@@ -1130,7 +1149,12 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         # Methods.
         self._createStyle(config)
+        #trst
+        #self.createContextMenu()
 
+
+
+#test
     @property
     def height(self):
         """

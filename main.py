@@ -9,6 +9,14 @@ from PySide2.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
                                QSplitter, QWidget, QFileDialog)
 import utils
 
+#标记数字位
+alphabet = [chr(i) for i in range(65,90)]
+alphabetNumber = 0
+
+#标记结点位置，选则最后一个点击的结点
+lastPointNode = 0
+
+
 app = QApplication(sys.argv)
 app.setWindowIcon(QIcon("UI/network.png"))
 mainWindow = MainWindow()
@@ -37,6 +45,14 @@ def saveGraph(graph: Graph, filePath):
         print('Invalid path : {0}'.format(filePath))
         print('Save aborted !')
         return False
+
+def addNode():
+    global alphabetNumber
+    locateLetter = alphabet[alphabetNumber]
+
+    node = nodz.createNode(name='node%s'%locateLetter, preset='node_preset_1', position=None)
+
+    alphabetNumber = alphabetNumber+1
 
 
 def loadGraph(filePath):
@@ -86,6 +102,11 @@ def loadGraph(filePath):
     return graph
 
 
+def DeleteNode():
+    nodz.deleteNode(lastPointNode)
+
+nodz.signal_AddNode.connect(addNode)
+nodz.signal_DeleteNode.connect(DeleteNode)
 # Nodes
 @QtCore.Slot(str)
 def on_nodeCreated(nodeName):
@@ -103,8 +124,14 @@ def on_nodeEdited(nodeName, newName):
 
 
 @QtCore.Slot(str)
-def on_nodeSelected(nodesName):
-    print('node selected : ', nodesName)
+def on_nodeSelected(node):
+    global lastPointNode
+    for i in node:
+        print(i.name)
+        lastPointNode = i
+
+
+  #  print('node selected : ', node)
 
 
 @QtCore.Slot(str, object)
@@ -254,6 +281,5 @@ graph = loadGraph(filePath)
 # for i in graph.AllRoad.ListGroup:
 #     i.travel()
 #     print(i.head.data[0])
-
 
 sys.exit(app.exec_())
