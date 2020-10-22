@@ -8,11 +8,22 @@ from PySide2.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
                                QHBoxLayout, QMainWindow, QMenu, QMenuBar,
                                QSplitter, QWidget, QFileDialog)
 import utils
+
+#标记数字位
+alphabet = [chr(i) for i in range(65,90)]
+alphabetNumber = 0
+
+#标记结点位置，选则最后一个点击的结点
+lastPointNode = 0
+
+
 app = QApplication(sys.argv)
 app.setWindowIcon(QIcon("UI/network.png"))
 mainWindow = MainWindow()
 
 nodz = mainWindow.nodz
+
+
 
 filePath = ""
 
@@ -28,7 +39,23 @@ def saveGraph(graph: Graph, filePath):
         print('Save aborted !')
         return False
 
+def addNode():
+    global alphabetNumber
+    locateLetter = alphabet[alphabetNumber]
 
+    node = nodz.createNode(name='node%s'%locateLetter, preset='node_preset_1', position=None)
+
+    alphabetNumber = alphabetNumber+1
+
+
+    print('helloword')
+
+def DeleteNode():
+    nodz.deleteNode(lastPointNode)
+    print('goodbyeBaby')
+
+nodz.signal_AddNode.connect(addNode)
+nodz.signal_DeleteNode.connect(DeleteNode)
 # Nodes
 @QtCore.Slot(str)
 def on_nodeCreated(nodeName):
@@ -46,8 +73,14 @@ def on_nodeEdited(nodeName, newName):
 
 
 @QtCore.Slot(str)
-def on_nodeSelected(nodesName):
-    print('node selected : ', nodesName)
+def on_nodeSelected(node):
+    global lastPointNode
+    for i in node:
+        print(i.name)
+        lastPointNode = i
+
+
+  #  print('node selected : ', node)
 
 
 @QtCore.Slot(str, object)
@@ -188,14 +221,24 @@ GraphA.AttackTable = {
     Fnode:[]
 }
 nodeA = nodz.createNode(name='nodeA', preset='node_preset_1', position=None)
+alphabetNumber += 1
 nodeB = nodz.createNode(name='nodeB', preset='node_preset_1', position=None)
+alphabetNumber += 1
 nodeC = nodz.createNode(name='nodeC', preset='node_preset_1', position=None)
+alphabetNumber += 1
 nodeD = nodz.createNode(name='nodeD', preset='node_preset_1', position=None)
+alphabetNumber += 1
 nodeE = nodz.createNode(name='nodeE', preset='node_preset_1', position=None)
+alphabetNumber += 1
 nodeF = nodz.createNode(name='nodeF', preset='node_preset_1', position=None)
+alphabetNumber += 1
+
+
 
 
 saveGraph(GraphA, "./test.json")
+
+
 
 
 
