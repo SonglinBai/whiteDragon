@@ -619,7 +619,7 @@ class Nodz(QtWidgets.QGraphicsView):
 
 
     # ATTRS
-    def createAttribute(self, node, name='default', index=-1, preset='attr_default', plug=True, socket=True, dataType=None, plugMaxConnections=-1, socketMaxConnections=1):
+    def createAttribute(self, node, name='default', index=-1, preset='attr_default', plug=True, socket=True, dataType=None, plugMaxConnections=-1, socketMaxConnections=-1):
         """
         Create a new attribute with a given name.
 

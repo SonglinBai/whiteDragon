@@ -38,6 +38,13 @@ class Graph(object):
 
         return True
 
+    def getNodeByLabel(self, label):
+        for node in self.__nodeList:
+            if node.label == label:
+                return node
+        return None
+
+
     def ShowTheNodeNum(self):#返回结点数量
         #print(self.__nodeNum)
         return self.__nodeNum
