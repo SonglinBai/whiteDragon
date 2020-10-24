@@ -1,24 +1,21 @@
 import sys
 import os
-from MainWindow import MainWindow
+from UI.MainWindow import MainWindow
 from domain.Graph import *
 from PySide2 import QtCore
 from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
-                               QHBoxLayout, QMainWindow, QMenu, QMenuBar,
-                               QSplitter, QWidget, QFileDialog)
+from PySide2.QtWidgets import (QApplication, QFileDialog)
 import utils
 
-#标记数字位
-alphabet = [chr(i) for i in range(65,90)]
+# 标记数字位
+alphabet = [chr(i) for i in range(65, 90)]
 alphabetNumber = 0
 
-#标记结点位置，选则最后一个点击的结点
+# 标记结点位置，选则最后一个点击的结点
 lastPointNode = 0
 
-
 app = QApplication(sys.argv)
-app.setWindowIcon(QIcon("UI/network.png"))
+app.setWindowIcon(QIcon("UI/icon/network.png"))
 mainWindow = MainWindow()
 
 nodz = mainWindow.nodz
@@ -46,13 +43,14 @@ def saveGraph(graph: Graph, filePath):
         print('Save aborted !')
         return False
 
+
 def addNode():
     global alphabetNumber
     locateLetter = alphabet[alphabetNumber]
 
-    node = nodz.createNode(name='node%s'%locateLetter, preset='node_preset_1', position=None)
+    node = nodz.createNode(name='node%s' % locateLetter, preset='node_preset_1', position=None)
 
-    alphabetNumber = alphabetNumber+1
+    alphabetNumber = alphabetNumber + 1
 
 
 def loadGraph(filePath):
@@ -105,8 +103,11 @@ def loadGraph(filePath):
 def DeleteNode():
     nodz.deleteNode(lastPointNode)
 
+
 nodz.signal_AddNode.connect(addNode)
 nodz.signal_DeleteNode.connect(DeleteNode)
+
+
 # Nodes
 @QtCore.Slot(str)
 def on_nodeCreated(nodeName):
@@ -131,7 +132,7 @@ def on_nodeSelected(node):
         lastPointNode = i
 
 
-  #  print('node selected : ', node)
+#  print('node selected : ', node)
 
 
 @QtCore.Slot(str, object)
@@ -210,14 +211,22 @@ def on_actSaveTriggered():
 
 @QtCore.Slot()
 def on_actSaveAsTriggered():
-    filePath = QFileDialog.getSaveFileName(mainWindow, mainWindow.tr('Save'), os.environ['HOME'],
+    filePath = QFileDialog.getSaveFileName(mainWindow, mainWindow.tr('Save'), os.environ['HOMEPATH'],
                                            mainWindow.tr('Json files (*.json)'))[0]
 
     saveGraph(filePath)
 
 
+@QtCore.Slot()
+def on_actOpenTriggered():
+    filePath = QFileDialog.getOpenFileName(mainWindow, mainWindow.tr('Open'), os.environ['HOMEPATH'],
+                                           mainWindow.tr('Json files (*.json)'))[0]
+    loadGraph(filePath)
+
+
 mainWindow.actSaveAs.triggered.connect(on_actSaveAsTriggered)
 mainWindow.actSave.triggered.connect(on_actSaveTriggered)
+mainWindow.actOpenFile.triggered.connect(on_actOpenTriggered)
 
 nodz.signal_NodeCreated.connect(on_nodeCreated)
 nodz.signal_NodeDeleted.connect(on_nodeDeleted)
@@ -271,8 +280,7 @@ nodz.signal_KeyPressed.connect(on_keyPressed)
 #     Enode:[Fnode],
 #     Fnode:[]
 # }
-filePath = './test.json'
-graph = loadGraph(filePath)
+
 # aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
 #
 # road = DoubleList()

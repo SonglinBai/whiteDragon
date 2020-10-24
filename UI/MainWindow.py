@@ -1,12 +1,10 @@
 import sys
-from os import path
 
-from PySide2.QtCore import QObject, Qt
+from PySide2.QtCore import Qt
 from PySide2.QtGui import QIcon
 from PySide2.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
-                               QHBoxLayout, QMainWindow, QMenu, QMenuBar,
-                               QSplitter, QWidget)
-from testFrame import testFrame
+                               QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget)
+from UI.testFrame import testFrame
 from Nodz.nodz_main import Nodz
 
 class MainWindow(QMainWindow):
@@ -17,7 +15,7 @@ class MainWindow(QMainWindow):
     def initUI(self):
         # set window title and icon
         self.setWindowTitle('WhiteDragon')
-        self.setWindowIcon(QIcon('network.png'))
+        self.setWindowIcon(QIcon('icon/network.png'))
 
         # move main window to center of screen
         self.resize(1280, 720)
@@ -122,9 +120,14 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.mainWidget)
 
 
+class NodeListView(QFrame):
+    def __init__(self):
+        super(NodeListView, self).__init__()
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     # set app icon
-    app.setWindowIcon(QIcon('network.png'))
+    app.setWindowIcon(QIcon('icon/network.png'))
     mainWindow = MainWindow()
     sys.exit(app.exec_())
