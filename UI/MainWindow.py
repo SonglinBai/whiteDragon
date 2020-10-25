@@ -6,6 +6,25 @@ from PySide2.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
                                QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem)
 from UI.testFrame import testFrame
 from Nodz.nodz_main import Nodz
+from QtPropertyBrowser.QtProperty.qtpropertymanager import (
+    QtBoolPropertyManager,
+    QtIntPropertyManager,
+    QtStringPropertyManager,
+    QtSizePropertyManager,
+    QtRectPropertyManager,
+    QtSizePolicyPropertyManager,
+    QtEnumPropertyManager,
+    QtGroupPropertyManager
+)
+from QtPropertyBrowser.QtProperty.qteditorfactory import (    QtCheckBoxFactory,
+    QtSpinBoxFactory,
+    QtSliderFactory,
+    QtScrollBarFactory,
+    QtLineEditFactory,
+    QtEnumEditorFactory
+)
+from QtPropertyBrowser.QtProperty.qtgroupboxpropertybrowser import QtGroupBoxPropertyBrowser
+from QtPropertyBrowser.libqt5.pyqtcore import QMap, QList
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -102,8 +121,8 @@ class MainWindow(QMainWindow):
         self.nodz.initialize()
         self.nodz.setFrameShape(QFrame.StyledPanel)
 
-        self.PropertiesFrame = testFrame('properties')
-        self.PropertiesFrame.setFrameShape(QFrame.StyledPanel)
+        self.PropertiesFrame = PropertyBrowserWidget()
+        # self.PropertiesFrame.setFrameShape(QFrame.StyledPanel)
 
         self.mainWidget.setLayout(self.mainLayout)
         sp = QSplitter(Qt.Vertical)
@@ -174,6 +193,77 @@ class ResultListWidget(QListWidget):
     def showClickedItem(self, item: QListWidgetItem):
         print(item.text())
 
+class PropertyBrowserWidget(QtGroupBoxPropertyBrowser):
+    def __init__(self):
+        super(PropertyBrowserWidget, self).__init__()
+
+    def testData(self):
+        boolManager = QtBoolPropertyManager(w)
+        intManager = QtIntPropertyManager(w)
+        stringManager = QtStringPropertyManager(w)
+        sizeManager = QtSizePropertyManager(w)
+        rectManager = QtRectPropertyManager(w)
+        sizePolicyManager = QtSizePolicyPropertyManager(w)
+        enumManager = QtEnumPropertyManager(w)
+        groupManager = QtGroupPropertyManager(w)
+
+        item0 = groupManager.addProperty("QObject")
+
+        item1 = stringManager.addProperty("objectName")
+        item0.addSubProperty(item1)
+
+        item2 = boolManager.addProperty("enabled")
+        item0.addSubProperty(item2)
+
+        item3 = rectManager.addProperty("geometry")
+        item0.addSubProperty(item3)
+
+        item4 = sizePolicyManager.addProperty("sizePolicy")
+        item0.addSubProperty(item4)
+
+        item5 = sizeManager.addProperty("sizeIncrement")
+        item0.addSubProperty(item5)
+
+        item7 = boolManager.addProperty("mouseTracking")
+        item0.addSubProperty(item7)
+
+        item8 = enumManager.addProperty("direction")
+        enumNames = QList()
+        enumNames.append("Up")
+        enumNames.append("Right")
+        enumNames.append("Down")
+        enumNames.append("Left")
+
+        enumManager.setEnumNames(item8, enumNames)
+        enumIcons = QMap()
+        enumIcons[0] = QIcon(":/demo/images/up.png")
+        enumIcons[1] = QIcon(":/demo/images/right.png")
+        enumIcons[2] = QIcon(":/demo/images/down.png")
+        enumIcons[3] = QIcon(":/demo/images/left.png")
+        enumManager.setEnumIcons(item8, enumIcons)
+        item0.addSubProperty(item8)
+
+        item9 = intManager.addProperty("value")
+        intManager.setRange(item9, -100, 100)
+        item0.addSubProperty(item9)
+
+        checkBoxFactory = QtCheckBoxFactory(self)
+        spinBoxFactory = QtSpinBoxFactory(self)
+        sliderFactory = QtSliderFactory(self)
+        scrollBarFactory = QtScrollBarFactory(self)
+        lineEditFactory = QtLineEditFactory(self)
+        comboBoxFactory = QtEnumEditorFactory(self)
+
+        self.setFactoryForManager(boolManager, checkBoxFactory)
+        self.setFactoryForManager(intManager, spinBoxFactory)
+        self.setFactoryForManager(stringManager, lineEditFactory)
+        self.setFactoryForManager(sizeManager.subIntPropertyManager(), spinBoxFactory)
+        self.setFactoryForManager(rectManager.subIntPropertyManager(), spinBoxFactory)
+        self.setFactoryForManager(sizePolicyManager.subIntPropertyManager(), spinBoxFactory)
+        self.setFactoryForManager(sizePolicyManager.subEnumPropertyManager(), comboBoxFactory)
+        self.setFactoryForManager(enumManager, comboBoxFactory)
+
+        self.addProperty(item0)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
