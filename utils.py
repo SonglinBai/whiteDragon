@@ -8,3 +8,19 @@ def _saveData(path,data):
 
     f.close()
     print("Data successfully saved!")
+
+def _loadData(filePath):
+    """
+    load data from a .json file.
+
+    :param filePath: Path of the .json file.
+    :type  filePath: Str.
+
+    """
+    with open(filePath) as json_file:
+        j_data = json.load(json_file)
+
+    json_file.close()
+
+    print("Data successfully loaded !")
+    return j_data

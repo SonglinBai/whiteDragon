@@ -1,33 +1,37 @@
 import sys
 import os
-from MainWindow import MainWindow
+from UI.MainWindow import MainWindow
 from domain.Graph import *
 from PySide2 import QtCore
 from PySide2.QtGui import QIcon
-from PySide2.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
-                               QHBoxLayout, QMainWindow, QMenu, QMenuBar,
-                               QSplitter, QWidget, QFileDialog)
+from PySide2.QtWidgets import (QApplication, QFileDialog)
 import utils
 
-#标记数字位
-alphabet = [chr(i) for i in range(65,90)]
+# 标记数字位
+alphabet = [chr(i) for i in range(65, 90)]
 alphabetNumber = 0
 
-#标记结点位置，选则最后一个点击的结点
+# 标记结点位置，选则最后一个点击的结点
 lastPointNode = 0
 
-
 app = QApplication(sys.argv)
-app.setWindowIcon(QIcon("UI/network.png"))
+app.setWindowIcon(QIcon("UI/icon/network.png"))
 mainWindow = MainWindow()
 
 nodz = mainWindow.nodz
 
-
-
 filePath = ""
+graph = Graph('Untitled')
+
 
 def saveGraph(graph: Graph, filePath):
+    """
+    Save Graph
+    :type graph: graph.
+    :param graph: the Graph you want to save
+    :type filePath: str
+    :param filePath: path you want to save
+    """
     data = graph.toJson()
     for node in data["NODES"]:
         nodeInst = nodz.scene().nodes[node["label"]]
@@ -39,23 +43,76 @@ def saveGraph(graph: Graph, filePath):
         print('Save aborted !')
         return False
 
+
 def addNode():
     global alphabetNumber
     locateLetter = alphabet[alphabetNumber]
 
-    node = nodz.createNode(name='node%s'%locateLetter, preset='node_preset_1', position=None)
+    node = nodz.createNode(name='node%s' % locateLetter, preset='node_preset_1', position=None)
 
-    alphabetNumber = alphabetNumber+1
+    alphabetNumber = alphabetNumber + 1
 
 
-    print('helloword')
+def loadGraph(filePath):
+    global graph
+    if os.path.exists(filePath):
+        data = utils._loadData(filePath=filePath)
+    else:
+        print('Invalid path : {0}'.format(filePath))
+        print('Load aborted !')
+        return False
+
+    nodesData = data["NODES"]
+
+    nodes = []
+    graph = Graph(data['NAME'])
+    mainWindow.itemListFrame.clear()
+    nodz.clearGraph()
+    for node in nodesData:
+        label = node['label']
+        position = node['position']
+        type = node['type']
+        port = node['port']
+        attempList = node['attemp']
+        position = QtCore.QPointF(position[0], position[1])
+
+        mainWindow.itemListFrame.addItem(label)
+
+        nodeCreated = nodz.createNode(label, 'node_default', position, False)
+        list = []
+        for attemp in attempList:
+            list.append(Attemp(attemp['label'], attemp['vulneList'], attemp['requestPermission'], attemp['prob'],
+                               attemp['result']))
+        nodes.append(Node(label, type, port, list))
+
+        nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=node.__class__, plug=False)
+        nodz.createAttribute(node=nodeCreated, name='out', index=1, dataType=node.__class__, socket=False)
+
+    graph.setNodeList(nodes)
+
+    connectionData = data['CONNECTION']
+    graph.AttackTable = dict()
+
+    for source in connectionData.keys():
+        graph.AttackTable[graph.getNodeByLabel(source)] = []
+        for target in connectionData[source]:
+            graph.AttackTable[graph.getNodeByLabel(source)].append(graph.getNodeByLabel(target))
+            nodz.createConnection(source, 'out', target, 'in')
+
+    nodz.scene().update()
+    nodz.signal_GraphLoaded.emit()
+
+    return graph
+
 
 def DeleteNode():
     nodz.deleteNode(lastPointNode)
-    print('goodbyeBaby')
+
 
 nodz.signal_AddNode.connect(addNode)
 nodz.signal_DeleteNode.connect(DeleteNode)
+
+
 # Nodes
 @QtCore.Slot(str)
 def on_nodeCreated(nodeName):
@@ -80,7 +137,7 @@ def on_nodeSelected(node):
         lastPointNode = i
 
 
-  #  print('node selected : ', node)
+#  print('node selected : ', node)
 
 
 @QtCore.Slot(str, object)
@@ -154,21 +211,32 @@ def on_actSaveTriggered():
     if len(filePath) <= 0:
         mainWindow.actSaveAs.trigger()
     else:
-        saveGraph(filePath)
+        saveGraph(graph, filePath)
 
 
 @QtCore.Slot()
 def on_actSaveAsTriggered():
-    filePath = QFileDialog.getSaveFileName(mainWindow, mainWindow.tr('Save'), os.environ['HOME'],
+    global filePath
+    filePath = QFileDialog.getSaveFileName(mainWindow, mainWindow.tr('Save'), os.path.dirname(filePath),
                                            mainWindow.tr('Json files (*.json)'))[0]
 
-    saveGraph(filePath)
+    saveGraph(graph,filePath)
+
+
+@QtCore.Slot()
+def on_actOpenTriggered():
+    global filePath
+    filePath = QFileDialog.getOpenFileName(mainWindow, mainWindow.tr('Open'), os.path.dirname(filePath),
+                                           mainWindow.tr('Json files (*.json)'))[0]
+    # print(filePath)
+    # print(os.path.dirname(filePath))
+    loadGraph(filePath)
 
 
 mainWindow.actSaveAs.triggered.connect(on_actSaveAsTriggered)
 mainWindow.actSave.triggered.connect(on_actSaveTriggered)
+mainWindow.actOpenFile.triggered.connect(on_actOpenTriggered)
 
-nodz.signal_NodeCreated.connect(on_nodeCreated)
 nodz.signal_NodeDeleted.connect(on_nodeDeleted)
 nodz.signal_NodeEdited.connect(on_nodeEdited)
 nodz.signal_NodeSelected.connect(on_nodeSelected)
@@ -191,56 +259,50 @@ nodz.signal_GraphEvaluated.connect(on_graphEvaluated)
 
 nodz.signal_KeyPressed.connect(on_keyPressed)
 
-GraphA = Graph('GraphA')
-#建立攻击模版
-bAttempV0 = Attemp('B(v0)', ['CVE-1'], 1, 1, 0.5)
-bAttempV1 = Attemp('B(v1)', ['CVE-2'], 0, 1, 0.2)
-cAttempV0 = Attemp('C(v0)', ['CVE-3'], 0, 1, 0.1)
-cAttempV1 = Attemp('C(v1)', ['CVE-4'], 1, 2, 0.3)
-cAttempV2 = Attemp('C(v2)', ['CVE-5'], 2, 3, 0.7)
-dAttempV0 = Attemp('D(v0)', ['CVE-6'], 0, 0, 0.4)
-eAttempV0 = Attemp('E(v0)', ['CVE-7'], 0, 0, 0.2)
-fAttempV0 = Attemp('F(v0)', ['CVE-8'], 0, 0, 0.9)
+# GraphA = Graph('GraphA')
+# #建立攻击模版
+# bAttempV0 = Attemp('B(v0)', ['CVE-1'], 1, 1, 0.5)
+# bAttempV1 = Attemp('B(v1)', ['CVE-2'], 0, 1, 0.2)
+# cAttempV0 = Attemp('C(v0)', ['CVE-3'], 0, 1, 0.1)
+# cAttempV1 = Attemp('C(v1)', ['CVE-4'], 1, 2, 0.3)
+# cAttempV2 = Attemp('C(v2)', ['CVE-5'], 2, 3, 0.7)
+# dAttempV0 = Attemp('D(v0)', ['CVE-6'], 0, 0, 0.4)
+# eAttempV0 = Attemp('E(v0)', ['CVE-7'], 0, 0, 0.2)
+# fAttempV0 = Attemp('F(v0)', ['CVE-8'], 0, 0, 0.9)
+#
+# #建立点：
+# Anode = Node('nodeA',0,[8086],[])
+# Bnode = Node('nodeB',1,[1123],[bAttempV0,bAttempV1])
+# Cnode = Node('nodeC',0,[2222],[cAttempV0,cAttempV1,cAttempV2])
+# Dnode = Node('nodeD',1,[2231],[dAttempV0])
+# Enode = Node('nodeE',1,[3112],[eAttempV0])
+# Fnode = Node('nodeF',2,[4445],[fAttempV0])
+# GraphA.setNodeList([Anode,Bnode,Cnode,Dnode,Enode,Fnode])
+#
+# #建立邻接多重表
+# GraphA.AttackTable = {
+#     Anode:[Bnode,Cnode,Dnode],
+#     Bnode:[Cnode,Enode],
+#     Cnode:[Enode],
+#     Dnode:[Cnode,Fnode],
+#     Enode:[Fnode],
+#     Fnode:[]
+# }
+# nodz.createNode('nodeA')
+# nodz.createNode('nodeB')
+# nodz.createNode('nodeC')
+# nodz.createNode('nodeD')
+# nodz.createNode('nodeE')
+# nodz.createNode('nodeF')
+# saveGraph(GraphA, "./test.json")
 
-#建立点：
-Anode = Node('nodeA',0,[8086],[])
-Bnode = Node('nodeB',1,[1123],[bAttempV0,bAttempV1])
-Cnode = Node('nodeC',0,[2222],[cAttempV0,cAttempV1,cAttempV2])
-Dnode = Node('nodeD',1,[2231],[dAttempV0])
-Enode = Node('nodeE',1,[3112],[eAttempV0])
-Fnode = Node('nodeF',2,[4445],[fAttempV0])
-GraphA.setNodeList([Anode,Bnode,Cnode,Dnode,Enode,Fnode])
-
-#建立邻接多重表
-GraphA.AttackTable = {
-    Anode:[Bnode,Cnode,Dnode],
-    Bnode:[Cnode,Enode],
-    Cnode:[Enode],
-    Dnode:[Cnode,Fnode],
-    Enode:[Fnode],
-    Fnode:[]
-}
-nodeA = nodz.createNode(name='nodeA', preset='node_preset_1', position=None)
-alphabetNumber += 1
-nodeB = nodz.createNode(name='nodeB', preset='node_preset_1', position=None)
-alphabetNumber += 1
-nodeC = nodz.createNode(name='nodeC', preset='node_preset_1', position=None)
-alphabetNumber += 1
-nodeD = nodz.createNode(name='nodeD', preset='node_preset_1', position=None)
-alphabetNumber += 1
-nodeE = nodz.createNode(name='nodeE', preset='node_preset_1', position=None)
-alphabetNumber += 1
-nodeF = nodz.createNode(name='nodeF', preset='node_preset_1', position=None)
-alphabetNumber += 1
-
-
-
-
-saveGraph(GraphA, "./test.json")
-
-
-
-
-
+# aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
+#
+# road = DoubleList()
+# road.append([graph.getNodeByLabel('nodeA'),aAttempV0])
+# graph.CoreAlgorithm(graph.getNodeByLabel('nodeA'), road)
+# for i in graph.AllRoad.ListGroup:
+#     i.travel()
+#     print(i.head.data[0])
 
 sys.exit(app.exec_())
