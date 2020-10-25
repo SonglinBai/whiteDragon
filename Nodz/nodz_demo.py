@@ -220,3 +220,4 @@ nodz.loadGraph(filePath='test.json')
 if app:
     # command line stand alone test... run our own event loop
     app.exec_()
+    #11
