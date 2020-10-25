@@ -80,9 +80,9 @@ from PyQt5.QtGui import (
     QBrush
     )
 
-from qtpropertybrowser import QtProperty, QtAbstractPropertyManager
-from qtpropertybrowserutils import QtPropertyBrowserUtils, QtCursorDatabase
-from pyqtcore import QList, QMap, QMapList, QMapMap, INT_MAX, INT_MIN
+from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtProperty, QtAbstractPropertyManager
+from QtPropertyBrowser.QtProperty.qtpropertybrowserutils import QtPropertyBrowserUtils, QtCursorDatabase
+from QtPropertyBrowser.libqt5.pyqtcore import QList, QMap, QMapList, QMapMap, INT_MAX, INT_MIN
 
 DATA_VAL            = 1
 DATA_MINVAL         = 2

@@ -1,5 +1,5 @@
 from typing import Union, List, Optional
-from PySide2.QtWidgets import QFrame, QLabel
+from PyQt5.QtWidgets import QFrame, QLabel
 
 
 class testFrame(QFrame):

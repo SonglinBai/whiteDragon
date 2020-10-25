@@ -1,8 +1,8 @@
 import sys
 
-from PySide2.QtCore import Qt, Slot
-from PySide2.QtGui import QIcon, QCursor
-from PySide2.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QIcon, QCursor
+from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
                                QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem)
 from UI.testFrame import testFrame
 from Nodz.nodz_main import Nodz
@@ -121,8 +121,8 @@ class MainWindow(QMainWindow):
         self.nodz.initialize()
         self.nodz.setFrameShape(QFrame.StyledPanel)
 
-        self.PropertiesFrame = PropertyBrowserWidget()
-        # self.PropertiesFrame.setFrameShape(QFrame.StyledPanel)
+        self.PropertiesFrame = testFrame("test")
+        self.PropertiesFrame.setFrameShape(QFrame.StyledPanel)
 
         self.mainWidget.setLayout(self.mainLayout)
         sp = QSplitter(Qt.Vertical)
@@ -162,7 +162,6 @@ class NodeListWidget(QListWidget):
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
 
-    @Slot(QListWidgetItem)
     def showClickedItem(self, item: QListWidgetItem):
         print(item.text())
 
@@ -189,7 +188,6 @@ class ResultListWidget(QListWidget):
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
 
-    @Slot(QListWidgetItem)
     def showClickedItem(self, item: QListWidgetItem):
         print(item.text())
 
