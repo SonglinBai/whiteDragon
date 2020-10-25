@@ -39,7 +39,7 @@
 ##
 #############################################################################
 
-from qteditorfactory import (
+from QtPropertyBrowser.QtProperty.qteditorfactory import (
     QtAbstractEditorFactory,
     QtSpinBoxFactory,
     QtCheckBoxFactory,
@@ -55,8 +55,8 @@ from qteditorfactory import (
     QtColorEditorFactory,
     QtFontEditorFactory
     )
-from qtpropertybrowser import QtProperty
-from qtpropertymanager import (
+from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtProperty
+from QtPropertyBrowser.QtProperty.qtpropertymanager import (
     QtAbstractPropertyManager,
     QtIntPropertyManager,
     QtBoolPropertyManager,
@@ -82,7 +82,7 @@ from qtpropertymanager import (
     QtCursorPropertyManager,
     QtGroupPropertyManager
     )
-from pyqtcore import QMap, QMapMap, qMetaTypeId
+from QtPropertyBrowser.libqt5.pyqtcore import QMap, QMapMap, qMetaTypeId
 from PyQt5.QtCore import QVariant, pyqtSignal, QUrl
 from PyQt5.QtGui import QIcon, QKeySequence
 

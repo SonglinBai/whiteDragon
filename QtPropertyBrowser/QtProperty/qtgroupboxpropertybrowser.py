@@ -38,13 +38,13 @@
 ##
 #############################################################################
 
-from qtpropertybrowser import QtAbstractPropertyBrowser
+from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractPropertyBrowser
 from PyQt5.QtCore import Qt, QTimer, QRect
 from PyQt5.QtWidgets import (
     QGridLayout, QLabel, QGroupBox, QSizePolicy, QSpacerItem,
     QFrame
     )
-from pyqtcore import (
+from QtPropertyBrowser.libqt5.pyqtcore import (
     QList,
     QMap
     )
@@ -78,14 +78,14 @@ class QtGroupBoxPropertyBrowserPrivate():
         item = QSpacerItem(0, 0, QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.m_mainLayout.addItem(item, 0, 0)
 
-    def slotEditorDestroyed(self):
-        editor = self.q_ptr.sender()
-        if (not editor):
-            return
-        if (not editor in self.m_widgetToItem.keys()):
-            return
-        self.m_widgetToItem[editor].widget = 0
-        self.m_widgetToItem.remove(editor)
+    # def slotEditorDestroyed(self):
+    #     editor = self.q_ptr.sender()
+    #     if (not editor):
+    #         return
+    #     if (not editor in self.m_widgetToItem.keys()):
+    #         return
+    #     self.m_widgetToItem[editor].widget = 0
+    #     self.m_widgetToItem.remove(editor)
 
     def slotUpdate(self):
         for item in self.m_recreateQueue:
@@ -216,7 +216,7 @@ class QtGroupBoxPropertyBrowserPrivate():
             newItem.widgetLabel.setSizePolicy(QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed))
             newItem.widgetLabel.setTextFormat(Qt.PlainText)
         else:
-            newItem.widget.destroyed.connect(self.slotEditorDestroyed)
+            # newItem.widget.destroyed.connect(self.slotEditorDestroyed)
             self.m_widgetToItem[newItem.widget] = newItem
 
         self.insertRow(layout, row)

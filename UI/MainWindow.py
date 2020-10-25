@@ -1,8 +1,8 @@
 import sys
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QIcon, QCursor
-from PyQt5.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
+from Qt.QtCore import Qt
+from Qt.QtGui import QIcon, QCursor
+from Qt.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
                                QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem)
 from UI.testFrame import testFrame
 from Nodz.nodz_main import Nodz
@@ -119,10 +119,12 @@ class MainWindow(QMainWindow):
 
         self.nodz = Nodz(None)
         self.nodz.initialize()
-        self.nodz.setFrameShape(QFrame.StyledPanel)
+        # self.nodz.setFrameShape(QFrame.StyledPanel)
+        # self.nodz = testFrame('nodz')
+        # self.nodz.setFrameShape(QFrame.StyledPanel)
 
-        self.PropertiesFrame = testFrame("test")
-        self.PropertiesFrame.setFrameShape(QFrame.StyledPanel)
+        self.PropertiesFrame = PropertyBrowserWidget(self)
+        # self.PropertiesFrame.setFrameShape(QFrame.StyledPanel)
 
         self.mainWidget.setLayout(self.mainLayout)
         sp = QSplitter(Qt.Vertical)
@@ -192,10 +194,11 @@ class ResultListWidget(QListWidget):
         print(item.text())
 
 class PropertyBrowserWidget(QtGroupBoxPropertyBrowser):
-    def __init__(self):
+    def __init__(self,parent):
         super(PropertyBrowserWidget, self).__init__()
+        self.testData(parent)
 
-    def testData(self):
+    def testData(self,w):
         boolManager = QtBoolPropertyManager(w)
         intManager = QtIntPropertyManager(w)
         stringManager = QtStringPropertyManager(w)

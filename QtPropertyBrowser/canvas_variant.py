@@ -52,13 +52,13 @@ from PyQt5.QtCore import (
     )
 from random import random
 from PyQt5.QtGui import QColor, QPen, QBrush
-from pyqtcore import QMap
-from qttreepropertybrowser import QtTreePropertyBrowser
+from QtPropertyBrowser.libqt5.pyqtcore import QMap
+from QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
 from qtvariantproperty import (
     QtVariantPropertyManager, 
     QtVariantEditorFactory
 )
-from qtcanvas import (
+from QtPropertyBrowser.qtcanvas import (
     QtCanvas, 
     QtCanvasView, 
     QtCanvasRectangle, 

@@ -39,7 +39,7 @@
 ##
 #############################################################################
 
-from qtpropertybrowser import QtAbstractPropertyBrowser, QtBrowserItem
+from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractPropertyBrowser, QtBrowserItem
 from PyQt5.QtCore import Qt, QRect, QSize, QEvent, QCoreApplication, pyqtSignal, pyqtProperty
 from PyQt5.QtWidgets import (
     QHBoxLayout, QItemDelegate,
@@ -56,7 +56,7 @@ from PyQt5.QtGui import (
     QFontMetrics, QColor,
     QPixmap)
 
-from pyqtcore import QList, QMap
+from QtPropertyBrowser.libqt5.pyqtcore import QList, QMap
 
 ## Draw an icon indicating opened/closing branches
 def drawIndicatorIcon(palette, style):

@@ -57,9 +57,9 @@ from PyQt5.QtWidgets import (
     QAction, 
     QApplication
 )
-from pyqtcore import QMap, QList, QMapMap
-from qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
-from qttreepropertybrowser import QtTreePropertyBrowser
+from QtPropertyBrowser.libqt5.pyqtcore import QMap, QList, QMapMap
+from QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
+from QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
 
 class ObjectControllerPrivate():
     def __init__(self):

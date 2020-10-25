@@ -51,8 +51,8 @@ from PyQt5.QtWidgets import (
     )
 from PyQt5.QtCore import Qt
 
-from pyqtcore import QMap, QList
-from qtpropertymanager import (
+from QtPropertyBrowser.libqt5.pyqtcore import QMap, QList
+from QtPropertyBrowser.QtProperty.qtpropertymanager import (
     QtBoolPropertyManager, 
     QtIntPropertyManager, 
     QtStringPropertyManager, 
@@ -62,7 +62,7 @@ from qtpropertymanager import (
     QtEnumPropertyManager, 
     QtGroupPropertyManager
     )
-from qteditorfactory import (
+from QtPropertyBrowser.QtProperty.qteditorfactory import (
     QtCheckBoxFactory, 
     QtSpinBoxFactory, 
     QtSliderFactory, 
@@ -71,9 +71,9 @@ from qteditorfactory import (
     QtEnumEditorFactory
     )
 
-from qttreepropertybrowser import QtTreePropertyBrowser
-from qtgroupboxpropertybrowser import QtGroupBoxPropertyBrowser
-from qtbuttonpropertybrowser import QtButtonPropertyBrowser
+from QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
+from QtPropertyBrowser.QtProperty.qtgroupboxpropertybrowser import QtGroupBoxPropertyBrowser
+from QtPropertyBrowser.QtProperty.qtbuttonpropertybrowser import QtButtonPropertyBrowser
 
 from PyQt5.QtGui import QIcon
 import demo_rc

@@ -38,7 +38,7 @@
 ##
 #############################################################################
 
-from qtpropertybrowser import QtAbstractPropertyBrowser, QtBrowserItem
+from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractPropertyBrowser, QtBrowserItem
 from PyQt5.QtCore import QTimer, Qt, QSize, QRect, pyqtSignal
 from PyQt5.QtWidgets import (
     QGridLayout,
@@ -49,7 +49,7 @@ from PyQt5.QtWidgets import (
     QFrame
 
     )
-from pyqtcore import QList, QMap
+from QtPropertyBrowser.libqt5.pyqtcore import QList, QMap
 
 ###
 #    \class QtButtonPropertyBrowser
@@ -165,14 +165,14 @@ class QtButtonPropertyBrowserPrivate():
         item = QSpacerItem(0, 0, QSizePolicy.Fixed, QSizePolicy.Expanding)
         self.m_mainLayout.addItem(item, 0, 0)
 
-    def slotEditorDestroyed(self):
-        editor = self.q_ptr.sender()
-        if (not editor):
-            return
-        if not self.m_widgetToItem.get(editor):
-            return
-        self.m_widgetToItem[editor].widget = 0
-        self.m_widgetToItem.remove(editor)
+    # def slotEditorDestroyed(self):
+    #     editor = self.q_ptr.sender()
+    #     if (not editor):
+    #         return
+    #     if not self.m_widgetToItem.get(editor):
+    #         return
+    #     self.m_widgetToItem[editor].widget = 0
+    #     self.m_widgetToItem.remove(editor)
 
     def slotUpdate(self):
         for item in self.m_recreateQueue:
@@ -308,7 +308,7 @@ class QtButtonPropertyBrowserPrivate():
         newItem.label.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
         newItem.widget = self.createEditor(index.property(), parentWidget)
         if (newItem.widget):
-            newItem.widget.destroyed.connect(self.slotEditorDestroyed)
+            # newItem.widget.destroyed.connect(self.slotEditorDestroyed)
             self.m_widgetToItem[newItem.widget] = newItem
         elif (index.property().hasValue()):
             newItem.widgetLabel = QLabel(parentWidget)

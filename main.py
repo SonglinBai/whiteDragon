@@ -2,9 +2,9 @@ import sys
 import os
 from UI.MainWindow import MainWindow
 from domain.Graph import *
-from PyQt5 import QtCore
-from PyQt5.QtGui import QIcon
-from PyQt5.QtWidgets import (QApplication, QFileDialog)
+from Qt import QtCore
+from Qt.QtGui import QIcon
+from Qt.QtWidgets import (QApplication, QFileDialog)
 import utils
 
 # 标记数字位

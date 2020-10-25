@@ -62,9 +62,9 @@ from PyQt5.QtCore import (
     )
 
 from PyQt5.QtGui import QKeySequence
-from pyqtcore import QList
-from qtvariantproperty import QtVariantEditorFactory, QtVariantPropertyManager
-from qttreepropertybrowser import QtTreePropertyBrowser
+from QtPropertyBrowser.libqt5.pyqtcore import QList
+from QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantEditorFactory, QtVariantPropertyManager
+from QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)

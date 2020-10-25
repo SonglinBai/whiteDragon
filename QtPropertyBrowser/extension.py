@@ -43,9 +43,9 @@ sys.path.append('QtProperty')
 sys.path.append('libqt5')
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QVariant, QPointF
-from pyqtcore import QMap
-from qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
-from qttreepropertybrowser import QtTreePropertyBrowser
+from QtPropertyBrowser.libqt5.pyqtcore import QMap
+from QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
+from QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
 
 class VariantManager(QtVariantPropertyManager):
     class Data:

@@ -51,9 +51,9 @@ from PyQt5.QtCore import (
     )
 from random import random
 from PyQt5.QtGui import QColor, QPen, QFont, QBrush
-from pyqtcore import QMap
-from qttreepropertybrowser import QtTreePropertyBrowser
-from qtpropertymanager import (
+from QtPropertyBrowser.libqt5.pyqtcore import QMap
+from QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
+from QtPropertyBrowser.QtProperty.qtpropertymanager import (
     QtDoublePropertyManager, 
     QtStringPropertyManager, 
     QtColorPropertyManager, 
@@ -61,14 +61,14 @@ from qtpropertymanager import (
     QtPointPropertyManager,
     QtSizePropertyManager
 )
-from qteditorfactory import (
+from QtPropertyBrowser.QtProperty.qteditorfactory import (
     QtDoubleSpinBoxFactory, 
     QtCheckBoxFactory, 
     QtSpinBoxFactory, 
     QtLineEditFactory, 
     QtEnumEditorFactory
 )
-from qtcanvas import (
+from QtPropertyBrowser.qtcanvas import (
     QtCanvas, 
     QtCanvasView, 
     QtCanvasRectangle, 
