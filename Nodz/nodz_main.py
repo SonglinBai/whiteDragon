@@ -1486,9 +1486,9 @@ class NodeItem(QtWidgets.QGraphicsItem):
         for node in nodes.values():
             node.setZValue(1)
 
-        for item in self.scene().items():
-            if isinstance(item, ConnectionItem):
-                item.setZValue(1)
+        # for item in self.scene().items():
+        #     if isinstance(item, ConnectionItem):
+        #         item.setZValue(1)
 
         self.setZValue(2)
 
@@ -1540,9 +1540,9 @@ class NodeItem(QtWidgets.QGraphicsItem):
         """
         nodzInst = self.scene().views()[0]
 
-        for item in nodzInst.scene().items():
-            if isinstance(item, ConnectionItem):
-                item.setZValue(0)
+        # for item in nodzInst.scene().items():
+        #     if isinstance(item, ConnectionItem):
+        #         item.setZValue(0)
 
         super(NodeItem, self).hoverLeaveEvent(event)
 
@@ -1995,7 +1995,8 @@ class ConnectionItem(QtWidgets.QGraphicsPathItem):
         """
         super(ConnectionItem, self).__init__()
 
-        self.setZValue(1)
+        # self.setZValue(1)
+        self.setZValue(3)
 
         # Storage.
         self.socketNode = None
@@ -2025,7 +2026,7 @@ class ConnectionItem(QtWidgets.QGraphicsPathItem):
         """
         config = self.source.scene().views()[0].config
         self.setAcceptHoverEvents(True)
-        self.setZValue(-1)
+        # self.setZValue(-1)
 
         self._pen = QtGui.QPen(utils._convertDataToColor(config['connection_color']))
         self._pen.setWidth(config['connection_width'])
@@ -2045,9 +2046,9 @@ class ConnectionItem(QtWidgets.QGraphicsPathItem):
         """
         nodzInst = self.scene().views()[0]
 
-        for item in nodzInst.scene().items():
-            if isinstance(item, ConnectionItem):
-                item.setZValue(0)
+        # for item in nodzInst.scene().items():
+        #     if isinstance(item, ConnectionItem):
+        #         item.setZValue(0)
 
         nodzInst.drawingConnection = True
 

@@ -54,6 +54,7 @@ def addNode():
 
 
 def loadGraph(filePath):
+    global graph
     if os.path.exists(filePath):
         data = utils._loadData(filePath=filePath)
     else:
@@ -65,6 +66,8 @@ def loadGraph(filePath):
 
     nodes = []
     graph = Graph(data['NAME'])
+    mainWindow.itemListFrame.clear()
+    nodz.clearGraph()
     for node in nodesData:
         label = node['label']
         position = node['position']
@@ -73,6 +76,8 @@ def loadGraph(filePath):
         attempList = node['attemp']
         position = QtCore.QPointF(position[0], position[1])
 
+        mainWindow.itemListFrame.addItem(label)
+
         nodeCreated = nodz.createNode(label, 'node_default', position, False)
         list = []
         for attemp in attempList:
@@ -80,8 +85,8 @@ def loadGraph(filePath):
                                attemp['result']))
         nodes.append(Node(label, type, port, list))
 
-        nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=node.__class__)
-        nodz.createAttribute(node=nodeCreated, name='out', index=1, dataType=node.__class__)
+        nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=node.__class__, plug=False)
+        nodz.createAttribute(node=nodeCreated, name='out', index=1, dataType=node.__class__, socket=False)
 
     graph.setNodeList(nodes)
 
@@ -211,16 +216,20 @@ def on_actSaveTriggered():
 
 @QtCore.Slot()
 def on_actSaveAsTriggered():
-    filePath = QFileDialog.getSaveFileName(mainWindow, mainWindow.tr('Save'), os.environ['HOMEPATH'],
+    global filePath
+    filePath = QFileDialog.getSaveFileName(mainWindow, mainWindow.tr('Save'), os.path.dirname(filePath),
                                            mainWindow.tr('Json files (*.json)'))[0]
 
-    saveGraph(filePath)
+    saveGraph(graph,filePath)
 
 
 @QtCore.Slot()
 def on_actOpenTriggered():
-    filePath = QFileDialog.getOpenFileName(mainWindow, mainWindow.tr('Open'), os.environ['HOMEPATH'],
+    global filePath
+    filePath = QFileDialog.getOpenFileName(mainWindow, mainWindow.tr('Open'), os.path.dirname(filePath),
                                            mainWindow.tr('Json files (*.json)'))[0]
+    # print(filePath)
+    # print(os.path.dirname(filePath))
     loadGraph(filePath)
 
 
@@ -228,7 +237,6 @@ mainWindow.actSaveAs.triggered.connect(on_actSaveAsTriggered)
 mainWindow.actSave.triggered.connect(on_actSaveTriggered)
 mainWindow.actOpenFile.triggered.connect(on_actOpenTriggered)
 
-nodz.signal_NodeCreated.connect(on_nodeCreated)
 nodz.signal_NodeDeleted.connect(on_nodeDeleted)
 nodz.signal_NodeEdited.connect(on_nodeEdited)
 nodz.signal_NodeSelected.connect(on_nodeSelected)
@@ -280,6 +288,13 @@ nodz.signal_KeyPressed.connect(on_keyPressed)
 #     Enode:[Fnode],
 #     Fnode:[]
 # }
+# nodz.createNode('nodeA')
+# nodz.createNode('nodeB')
+# nodz.createNode('nodeC')
+# nodz.createNode('nodeD')
+# nodz.createNode('nodeE')
+# nodz.createNode('nodeF')
+# saveGraph(GraphA, "./test.json")
 
 # aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
 #
