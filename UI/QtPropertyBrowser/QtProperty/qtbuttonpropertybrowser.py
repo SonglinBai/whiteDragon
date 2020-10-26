@@ -38,39 +38,126 @@
 ##
 #############################################################################
 
-from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractPropertyBrowser
-from PyQt5.QtCore import Qt, QTimer, QRect
+from UI.QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractPropertyBrowser, QtBrowserItem
+from PyQt5.QtCore import QTimer, Qt, QSize, QRect, pyqtSignal
 from PyQt5.QtWidgets import (
-    QGridLayout, QLabel, QGroupBox, QSizePolicy, QSpacerItem,
+    QGridLayout,
+    QToolButton,
+    QLabel,
+    QSizePolicy,
+    QSpacerItem,
     QFrame
+
     )
-from QtPropertyBrowser.libqt5.pyqtcore import (
-    QList,
-    QMap
-    )
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QList, QMap
+
+###
+#    \class QtButtonPropertyBrowser
+#
+#    \brief The QtButtonPropertyBrowser class provides a drop down QToolButton
+#    based property browser.
+#
+#    A property browser is a widget that enables the user to edit a
+#    given set of properties. Each property is represented by a label
+#    specifying the property's name, and an editing widget (e.g. a line
+#    edit or a combobox) holding its value. A property can have zero or
+#    more subproperties.
+#
+#    QtButtonPropertyBrowser provides drop down button for all nested
+#    properties, i.e. subproperties are enclosed by a container associated with
+#    the drop down button. The parent property's name is displayed as button text. For example:
+#
+#    \image qtbuttonpropertybrowser.png
+#
+#    Use the QtAbstractPropertyBrowser API to add, insert and remove
+#    properties from an instance of the QtButtonPropertyBrowser
+#    class. The properties themselves are created and managed by
+#    implementations of the QtAbstractPropertyManager class.
+#
+#    \sa QtTreePropertyBrowser, QtAbstractPropertyBrowser
+###
+
+###
+#    \fn void QtButtonPropertyBrowser::collapsed(item)
+#
+#    This signal is emitted when the \a item is collapsed.
+#
+#    \sa expanded(), setExpanded()
+###
+
+###
+#    \fn void QtButtonPropertyBrowser::expanded(item)
+#
+#    This signal is emitted when the \a item is expanded.
+#
+#    \sa collapsed(), setExpanded()
+###
+
+###
+#    Creates a property browser with the given \a parent.
+###
+
 class WidgetItem():
     def __init__(self):
-        self.widget = 0# can be null
         self.label = 0
         self.widgetLabel = 0
-        self.groupBox = 0
+        self.button = 0
+        self.container = 0
         self.layout = 0
-        self.line = 0
         self.parent = None
         self.children = QList()
+        self.expanded = False
+        self.widget = 0# can be null
 
-class QtGroupBoxPropertyBrowserPrivate():
+class QtButtonPropertyBrowserPrivate():
     def __init__(self):
         self.q_ptr = None
+        self.WidgetItem = WidgetItem()
         self.m_indexToItem = QMap()
         self.m_itemToIndex = QMap()
         self.m_widgetToItem = QMap()
-        self.m_mainLayout = 0
+        self.m_buttonToItem = QMap()
+        self.m_mainLayout = None
         self.m_children = QList()
         self.m_recreateQueue = QList()
 
     def createEditor(self, property, parent):
         return self.q_ptr.createEditor(property, parent)
+
+    def createButton(self, parent=None):
+        button = QToolButton(parent)
+        button.setCheckable(True)
+        button.setSizePolicy(QSizePolicy(QSizePolicy.Preferred, QSizePolicy.Fixed))
+        button.setToolButtonStyle(Qt.ToolButtonTextBesideIcon)
+        button.setArrowType(Qt.DownArrow)
+        button.setIconSize(QSize(3, 16))
+        ###
+        #QIcon icon
+        #icon.addPixmap(self.style().standardPixmap(QStyle.SP_ArrowDown), QIcon.Normal, QIcon.Off)
+        #icon.addPixmap(self.style().standardPixmap(QStyle.SP_ArrowUp), QIcon.Normal, QIcon.On)
+        #button.setIcon(icon)
+        ###
+        return button
+
+    def gridRow(self, item):
+        siblings = QList()
+        if (item.parent):
+            siblings = item.parent.children
+        else:
+            siblings = self.m_children
+
+        row = 0
+        for sibling in siblings:
+            if (sibling == item):
+                return row
+            row += self.gridSpan(sibling)
+
+        return -1
+
+    def gridSpan(self, item):
+        if (item.container and item.expanded):
+            return 2
+        return 1
 
     def init(self, parent):
         self.m_mainLayout = QGridLayout()
@@ -82,43 +169,26 @@ class QtGroupBoxPropertyBrowserPrivate():
     #     editor = self.q_ptr.sender()
     #     if (not editor):
     #         return
-    #     if (not editor in self.m_widgetToItem.keys()):
+    #     if not self.m_widgetToItem.get(editor):
     #         return
     #     self.m_widgetToItem[editor].widget = 0
     #     self.m_widgetToItem.remove(editor)
 
     def slotUpdate(self):
         for item in self.m_recreateQueue:
-            par = item.parent
+            parent = item.parent
             w = 0
             l = 0
-            oldRow = -1
-            if (not par):
+            oldRow = self.gridRow(item)
+            if (parent):
+                w = parent.container
+                l = parent.layout
+            else:
                 w = self.q_ptr
                 l = self.m_mainLayout
-                oldRow = self.m_children.indexOf(item)
-            else:
-                w = par.groupBox
-                l = par.layout
-                oldRow = par.children.indexOf(item)
-                if (self.hasHeader(par)):
-                    oldRow += 2
-
-            if (item.widget):
-                item.widget.setParent(w)
-            elif (item.widgetLabel):
-                item.widgetLabel.setParent(w)
-            else:
-                item.widgetLabel = QLabel(w)
-                item.widgetLabel.setSizePolicy(QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed))
-                item.widgetLabel.setTextFormat(Qt.PlainText)
 
             span = 1
-            if (item.widget):
-                l.addWidget(item.widget, oldRow, 1, 1, 1)
-            elif (item.widgetLabel):
-                l.addWidget(item.widgetLabel, oldRow, 1, 1, 1)
-            else:
+            if (not item.widget and not item.widgetLabel):
                 span = 2
             item.label = QLabel(w)
             item.label.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
@@ -128,8 +198,51 @@ class QtGroupBoxPropertyBrowserPrivate():
 
         self.m_recreateQueue.clear()
 
+    def setExpanded(self, item, expanded):
+        if (item.expanded == expanded):
+            return
+
+        if (not item.container):
+            return
+
+        item.expanded = expanded
+        row = self.gridRow(item)
+        parent = item.parent
+        l = 0
+        if (parent):
+            l = parent.layout
+        else:
+            l = self.m_mainLayout
+
+        if (expanded):
+            self.insertRow(l, row + 1)
+            l.addWidget(item.container, row + 1, 0, 1, 2)
+            item.container.show()
+        else:
+            l.removeWidget(item.container)
+            item.container.hide()
+            self.removeRow(l, row + 1)
+
+        item.button.setChecked(expanded)
+        if expanded:
+            item.button.setArrowType(Qt.UpArrow)
+        else:
+            item.button.setArrowType(Qt.DownArrow)
+
+    def slotToggled(self, checked):
+        item = self.m_buttonToItem[self.q_ptr.sender()]
+        if (not item):
+            return
+
+        self.setExpanded(item, checked)
+
+        if (checked):
+            self.q_ptr.expandedSignal.emit(self.m_itemToIndex[item])
+        else:
+            self.q_ptr.collapsedSignal.emit(self.m_itemToIndex[item])
+
     def updateLater(self):
-        QTimer.singleShot(0, self.q_ptr, self.slotUpdate())
+        QTimer.singleShot(0, self.slotUpdate)
 
     def propertyInserted(self, index, afterIndex):
         afterItem = self.m_indexToItem[afterIndex]
@@ -148,76 +261,58 @@ class QtGroupBoxPropertyBrowserPrivate():
             else:
                 self.m_children.insert(0, newItem)
         else:
+            row = self.gridRow(afterItem) + self.gridSpan(afterItem)
             if (parentItem):
-                row = parentItem.children.indexOf(afterItem) + 1
-                parentItem.children.insert(row, newItem)
+                parentItem.children.insert(parentItem.children.indexOf(afterItem) + 1, newItem)
             else:
-                row = self.m_children.indexOf(afterItem) + 1
-                self.m_children.insert(row, newItem)
-
-        if (parentItem and self.hasHeader(parentItem)):
-            row += 2
+                self.m_children.insert(self.m_children.indexOf(afterItem) + 1, newItem)
 
         if (not parentItem):
             layout = self.m_mainLayout
             parentWidget = self.q_ptr
         else:
-            if not parentItem.groupBox:
+            if (not parentItem.container):
                 self.m_recreateQueue.removeAll(parentItem)
-                par = parentItem.parent
-                w = 0
+                grandParent = parentItem.parent
                 l = 0
-                oldRow = -1
-                if (not par):
-                    w = self.q_ptr
-                    l = self.m_mainLayout
-                    oldRow = self.m_children.indexOf(parentItem)
+                oldRow = self.gridRow(parentItem)
+                if (grandParent):
+                    l = grandParent.layout
                 else:
-                    w = par.groupBox
-                    l = par.layout
-                    oldRow = par.children.indexOf(parentItem)
-                    if (self.hasHeader(par)):
-                        oldRow += 2
+                    l = self.m_mainLayout
 
-                parentItem.groupBox = QGroupBox(w)
+                container = QFrame()
+                container.setFrameShape(QFrame.Panel)
+                container.setFrameShadow(QFrame.Raised)
+                parentItem.container = container
+                parentItem.button = self.createButton()
+                self.m_buttonToItem[parentItem.button] = parentItem
+                parentItem.button.toggled.connect(self.slotToggled)
                 parentItem.layout = QGridLayout()
-                parentItem.groupBox.setLayout(parentItem.layout)
+                container.setLayout(parentItem.layout)
                 if (parentItem.label):
                     l.removeWidget(parentItem.label)
                     parentItem.label.close()
                     parentItem.label = 0
 
-                if (parentItem.widget):
-                    l.removeWidget(parentItem.widget)
-                    parentItem.widget.setParent(parentItem.groupBox)
-                    parentItem.layout.addWidget(parentItem.widget, 0, 0, 1, 2)
-                    parentItem.line = QFrame(parentItem.groupBox)
-                elif (parentItem.widgetLabel):
-                    l.removeWidget(parentItem.widgetLabel)
-                    parentItem.widgetLabel.close()
-                    parentItem.widgetLabel = 0
-
-                if (parentItem.line):
-                    parentItem.line.setFrameShape(QFrame.HLine)
-                    parentItem.line.setFrameShadow(QFrame.Sunken)
-                    parentItem.layout.addWidget(parentItem.line, 1, 0, 1, 2)
-
-                l.addWidget(parentItem.groupBox, oldRow, 0, 1, 2)
+                span = 1
+                if (not parentItem.widget and not parentItem.widgetLabel):
+                    span = 2
+                l.addWidget(parentItem.button, oldRow, 0, 1, span)
                 self.updateItem(parentItem)
 
             layout = parentItem.layout
-            parentWidget = parentItem.groupBox
+            parentWidget = parentItem.container
 
         newItem.label = QLabel(parentWidget)
         newItem.label.setSizePolicy(QSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed))
         newItem.widget = self.createEditor(index.property(), parentWidget)
-        if (not newItem.widget):
-            newItem.widgetLabel = QLabel(parentWidget)
-            newItem.widgetLabel.setSizePolicy(QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed))
-            newItem.widgetLabel.setTextFormat(Qt.PlainText)
-        else:
+        if (newItem.widget):
             # newItem.widget.destroyed.connect(self.slotEditorDestroyed)
             self.m_widgetToItem[newItem.widget] = newItem
+        elif (index.property().hasValue()):
+            newItem.widgetLabel = QLabel(parentWidget)
+            newItem.widgetLabel.setSizePolicy(QSizePolicy(QSizePolicy.Ignored, QSizePolicy.Fixed))
 
         self.insertRow(layout, row)
         span = 1
@@ -227,7 +322,7 @@ class QtGroupBoxPropertyBrowserPrivate():
             layout.addWidget(newItem.widgetLabel, row, 1)
         else:
             span = 2
-        layout.addWidget(newItem.label, row, 0, 1, span)
+        layout.addWidget(newItem.label, row, 0, span, 1)
 
         self.m_itemToIndex[newItem] = index
         self.m_indexToItem[index] = newItem
@@ -242,16 +337,16 @@ class QtGroupBoxPropertyBrowserPrivate():
 
         parentItem = item.parent
 
-        row = -1
+        row = self.gridRow(item)
 
         if (parentItem):
-            row = parentItem.children.indexOf(item)
-            parentItem.children.removeAt(row)
-            if (self.hasHeader(parentItem)):
-                row += 2
+            parentItem.children.removeAt(parentItem.children.indexOf(item))
         else:
-            row = self.m_children.indexOf(item)
-            self.m_children.removeAt(row)
+            self.m_children.removeAt(self.m_children.indexOf(item))
+
+        colSpan = self.gridSpan(item)
+
+        self.m_buttonToItem.remove(item.button)
 
         if (item.widget):
             item.widget.close()
@@ -262,44 +357,46 @@ class QtGroupBoxPropertyBrowserPrivate():
         if (item.widgetLabel):
             item.widgetLabel.close()
             del item.widgetLabel
-        if (item.groupBox):
-            item.groupBox.close()
-            del item.groupBox
+        if (item.button):
+            item.button.close()
+            del item.button
+        if (item.container):
+            item.container.close()
+            del item.container
 
         if (not parentItem):
             self.removeRow(self.m_mainLayout, row)
-        elif len(parentItem.children) > 0:
+            if (colSpan > 1):
+                self.removeRow(self.m_mainLayout, row)
+        elif (len(parentItem.children) != 0):
             self.removeRow(parentItem.layout, row)
+            if (colSpan > 1):
+                self.removeRow(parentItem.layout, row)
         else:
-            par = parentItem.parent
+            grandParent = parentItem.parent
             l = 0
-            oldRow = -1
-            if (not par):
+            if (grandParent):
+                l = grandParent.layout
+            else:
                 l = self.m_mainLayout
-                oldRow = self.m_children.indexOf(parentItem)
-            else:
-                l = par.layout
-                oldRow = par.children.indexOf(parentItem)
-                if (self.hasHeader(par)):
-                    oldRow += 2
 
-            if (parentItem.widget):
-                parentItem.widget.hide()
-                parentItem.widget.setParent(0)
-            elif (parentItem.widgetLabel):
-                parentItem.widgetLabel.hide()
-                parentItem.widgetLabel.setParent(0)
-            else:
-                #parentItem.widgetLabel = QLabel(w)
-                pass
+            parentRow = self.gridRow(parentItem)
+            parentSpan = self.gridSpan(parentItem)
 
-            l.removeWidget(parentItem.groupBox)
-            parentItem.groupBox.close()
-            parentItem.groupBox = 0
-            parentItem.line = 0
+            l.removeWidget(parentItem.button)
+            l.removeWidget(parentItem.container)
+            parentItem.button.close()
+            del parentItem.button
+            parentItem.container.close()
+            del parentItem.container
+            parentItem.button = 0
+            parentItem.container = 0
             parentItem.layout = 0
             if (not parentItem in self.m_recreateQueue):
                  self.m_recreateQueue.append(parentItem)
+            if (parentSpan > 1):
+                self.removeRow(l, parentRow + 1)
+
             self.updateLater()
 
         self.m_recreateQueue.removeAll(item)
@@ -309,35 +406,30 @@ class QtGroupBoxPropertyBrowserPrivate():
     def insertRow(self, layout, row):
         itemToPos = QMap()
         idx = 0
-        while (idx < layout.count()):
+        while (idx < len(layout)):
             r, c, rs, cs = layout.getItemPosition(idx)
             if (r >= row):
                 itemToPos[layout.takeAt(idx)] = QRect(r + 1, c, rs, cs)
             else:
                 idx += 1
 
-        for it in itemToPos.keys():
-            r = itemToPos[it]
-            layout.addItem(it, r.x(), r.y(), r.width(), r.height())
+        for k in itemToPos.keys():
+            r = itemToPos[k]
+            layout.addItem(k, r.x(), r.y(), r.width(), r.height())
 
     def removeRow(self, layout, row):
         itemToPos = QMap()
         idx = 0
-        while (idx < layout.count()):
+        while (idx < len(layout)):
             r, c, rs, cs = layout.getItemPosition(idx)
             if (r > row):
                 itemToPos[layout.takeAt(idx)] = QRect(r - 1, c, rs, cs)
             else:
                 idx += 1
 
-        for it in itemToPos.keys():
-            r = itemToPos[it]
-            layout.addItem(it, r.x(), r.y(), r.width(), r.height())
-
-    def hasHeader(self, item):
-        if (item.widget):
-            return True
-        return False
+        for k in itemToPos.keys():
+            r = itemToPos[k]
+            layout.addItem(k, r.x(), r.y(), r.width(), r.height())
 
     def propertyChanged(self, index):
         item = self.m_indexToItem[index]
@@ -346,15 +438,15 @@ class QtGroupBoxPropertyBrowserPrivate():
 
     def updateItem(self, item):
         property = self.m_itemToIndex[item].property()
-        if (item.groupBox):
-            font = item.groupBox.font()
+        if (item.button):
+            font = item.button.font()
             font.setUnderline(property.isModified())
-            item.groupBox.setFont(font)
-            item.groupBox.setTitle(property.propertyName())
-            item.groupBox.setToolTip(property.toolTip())
-            item.groupBox.setStatusTip(property.statusTip())
-            item.groupBox.setWhatsThis(property.whatsThis())
-            item.groupBox.setEnabled(property.isEnabled())
+            item.button.setFont(font)
+            item.button.setText(property.propertyName())
+            item.button.setToolTip(property.toolTip())
+            item.button.setStatusTip(property.statusTip())
+            item.button.setWhatsThis(property.whatsThis())
+            item.button.setEnabled(property.isEnabled())
 
         if (item.label):
             font = item.label.font()
@@ -381,43 +473,15 @@ class QtGroupBoxPropertyBrowserPrivate():
             item.widget.setEnabled(property.isEnabled())
             item.widget.setToolTip(property.valueText())
 
-        #item.setIcon(1, property.valueIcon())
-
-###
-#    \class QtGroupBoxPropertyBrowser
-#
-#    \brief The QtGroupBoxPropertyBrowser class provides a QGroupBox
-#    based property browser.
-#
-#    A property browser is a widget that enables the user to edit a
-#    given set of properties. Each property is represented by a label
-#    specifying the property's name, and an editing widget (e.g. a line
-#    edit or a combobox) holding its value. A property can have zero or
-#    more subproperties.
-#
-#    QtGroupBoxPropertyBrowser provides group boxes for all nested
-#    properties, i.e. subproperties are enclosed by a group box with
-#    the parent property's name as its title. For example:
-#
-#    \image qtgroupboxpropertybrowser.png
-#
-#    Use the QtAbstractPropertyBrowser API to add, insert and remove
-#    properties from an instance of the QtGroupBoxPropertyBrowser
-#    class. The properties themselves are created and managed by
-#    implementations of the QtAbstractPropertyManager class.
-#
-#    \sa QtTreePropertyBrowser, QtAbstractPropertyBrowser
-###
-
-###
-#    Creates a property browser with the given \a parent.
-###
-class QtGroupBoxPropertyBrowser(QtAbstractPropertyBrowser):
+class QtButtonPropertyBrowser(QtAbstractPropertyBrowser):
+    collapsedSignal = pyqtSignal(QtBrowserItem)
+    expandedSignal = pyqtSignal(QtBrowserItem)
     def __init__(self, parent=None):
-        super(QtGroupBoxPropertyBrowser, self).__init__(parent)
+        super(QtButtonPropertyBrowser, self).__init__(parent)
 
-        self.d_ptr = QtGroupBoxPropertyBrowserPrivate()
+        self.d_ptr = QtButtonPropertyBrowserPrivate()
         self.d_ptr.q_ptr = self
+
         self.d_ptr.init(self)
 
     ###
@@ -431,8 +495,8 @@ class QtGroupBoxPropertyBrowser(QtAbstractPropertyBrowser):
     #    \sa QtProperty, QtAbstractPropertyManager
     ###
     def __del__(self):
-        for it in self.d_ptr.m_itemToIndex.keys():
-           del it
+        for item in self.d_ptr.m_itemToIndex.keys():
+            del item
         del self.d_ptr
 
     ###
@@ -454,6 +518,27 @@ class QtGroupBoxPropertyBrowser(QtAbstractPropertyBrowser):
         self.d_ptr.propertyChanged(item)
 
     ###
+    #    Sets the \a item to either collapse or expanded, depending on the value of \a expanded.
+    #
+    #    \sa isExpanded(), expanded(), collapsed()
+    ###
+    def setExpanded(self, item, expanded):
+        itm = self.d_ptr.m_indexToItem[item]
+        if (itm):
+            self.d_ptr.setExpanded(itm, expanded)
+
+    ###
+    #    Returns True if the \a item is expanded; otherwise returns False.
+    #
+    #    \sa setExpanded()
+    ###
+    def isExpanded(self, item):
+        itm = self.d_ptr.m_indexToItem[item]
+        if (itm):
+            return itm.expanded
+        return False
+
+    ###
     #   Return the position of scroll bar
     ###
     def scrollPosition(self):
@@ -464,3 +549,4 @@ class QtGroupBoxPropertyBrowser(QtAbstractPropertyBrowser):
     ###
     def setScrollPosition(self, dx, dy):
         pass
+    

@@ -47,28 +47,18 @@ from PyQt5.QtCore import (
     QPoint, 
     Qt, 
     QSize, 
+    QVariant, 
     pyqtSignal
     )
 from random import random
-from PyQt5.QtGui import QColor, QPen, QFont, QBrush
-from QtPropertyBrowser.libqt5.pyqtcore import QMap
-from QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
-from QtPropertyBrowser.QtProperty.qtpropertymanager import (
-    QtDoublePropertyManager, 
-    QtStringPropertyManager, 
-    QtColorPropertyManager, 
-    QtFontPropertyManager, 
-    QtPointPropertyManager,
-    QtSizePropertyManager
+from PyQt5.QtGui import QColor, QPen, QBrush
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QMap
+from UI.QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
+from qtvariantproperty import (
+    QtVariantPropertyManager, 
+    QtVariantEditorFactory
 )
-from QtPropertyBrowser.QtProperty.qteditorfactory import (
-    QtDoubleSpinBoxFactory, 
-    QtCheckBoxFactory, 
-    QtSpinBoxFactory, 
-    QtLineEditFactory, 
-    QtEnumEditorFactory
-)
-from QtPropertyBrowser.qtcanvas import (
+from UI.QtPropertyBrowser.qtcanvas import (
     QtCanvas, 
     QtCanvasView, 
     QtCanvasRectangle, 
@@ -78,6 +68,7 @@ from QtPropertyBrowser.qtcanvas import (
     QtCanvasItem, 
     RttiValues
     )
+
 def rand():
     return int(random()*0x7fff)
 
@@ -118,7 +109,6 @@ class CanvasView(QtCanvasView):
 class MainWindow(QMainWindow):
     def __init__(self, parent=None):
         super(MainWindow, self).__init__(parent)
-
         self.propertyToId = QMap()
         self.idToProperty = QMap()
         self.idToExpanded = QMap()
@@ -154,25 +144,10 @@ class MainWindow(QMainWindow):
         fillAction.triggered.connect(self.fillView)
         editMenu.addAction(fillAction)
 
-        self.doubleManager = QtDoublePropertyManager(self)
-        self.stringManager = QtStringPropertyManager(self)
-        self.colorManager = QtColorPropertyManager(self)
-        self.fontManager = QtFontPropertyManager(self)
-        self.pointManager = QtPointPropertyManager(self)
-        self.sizeManager = QtSizePropertyManager(self)
+        self.variantManager = QtVariantPropertyManager(self)
 
-        self.doubleManager.valueChangedSignal.connect(self.valueChanged)
-        self.stringManager.valueChangedSignal.connect(self.valueChanged)
-        self.colorManager.valueChangedSignal.connect(self.valueChanged)
-        self.fontManager.valueChangedSignal.connect(self.valueChanged)
-        self.pointManager.valueChangedSignal.connect(self.valueChanged)
-        self.sizeManager.valueChangedSignal.connect(self.valueChanged)
-
-        doubleSpinBoxFactory = QtDoubleSpinBoxFactory(self)
-        checkBoxFactory = QtCheckBoxFactory(self)
-        spinBoxFactory = QtSpinBoxFactory(self)
-        lineEditFactory = QtLineEditFactory(self)
-        comboBoxFactory = QtEnumEditorFactory(self)
+        self.variantManager.valueChangedSignal.connect(self.valueChanged)
+        variantFactory = QtVariantEditorFactory(self)
 
         self.canvas = QtCanvas(800, 600)
         self.canvasView = CanvasView(self.canvas, self)
@@ -182,14 +157,7 @@ class MainWindow(QMainWindow):
         self.addDockWidget(Qt.RightDockWidgetArea, dock)
 
         self.propertyEditor = QtTreePropertyBrowser(dock)
-        self.propertyEditor.setFactoryForManager(self.doubleManager, doubleSpinBoxFactory)
-        self.propertyEditor.setFactoryForManager(self.stringManager, lineEditFactory)
-        self.propertyEditor.setFactoryForManager(self.colorManager.subIntPropertyManager(), spinBoxFactory)
-        self.propertyEditor.setFactoryForManager(self.fontManager.subIntPropertyManager(), spinBoxFactory)
-        self.propertyEditor.setFactoryForManager(self.fontManager.subBoolPropertyManager(), checkBoxFactory)
-        self.propertyEditor.setFactoryForManager(self.fontManager.subEnumPropertyManager(), comboBoxFactory)
-        self.propertyEditor.setFactoryForManager(self.pointManager.subIntPropertyManager(), spinBoxFactory)
-        self.propertyEditor.setFactoryForManager(self.sizeManager.subIntPropertyManager(), spinBoxFactory)
+        self.propertyEditor.setFactoryForManager(self.variantManager, variantFactory)
         dock.setWidget(self.propertyEditor)
 
         self.currentItem = QtCanvasItem(None)
@@ -281,9 +249,9 @@ class MainWindow(QMainWindow):
         if (item != self.currentItem or self.currentItem.isNone()):
             return
 
-        self.doubleManager.setValue(self.idToProperty["xpos"], item.x())
-        self.doubleManager.setValue(self.idToProperty["ypos"], item.y())
-        self.doubleManager.setValue(self.idToProperty["zpos"], item.z())
+        self.variantManager.setValue(self.idToProperty["xpos"], item.x())
+        self.variantManager.setValue(self.idToProperty["ypos"], item.y())
+        self.variantManager.setValue(self.idToProperty["zpos"], item.z())
 
     def updateExpandState(self):
         l = self.propertyEditor.topLevelItems()
@@ -305,69 +273,71 @@ class MainWindow(QMainWindow):
 
         self.deleteAction.setEnabled(True)
 
-        property = self.doubleManager.addProperty(self.tr("Position X"))
-        self.doubleManager.setRange(property, 0, self.canvas.width())
-        self.doubleManager.setValue(property, item.x())
+        property = self.variantManager.addProperty(QVariant.Double, self.tr("Position X"))
+        property.setAttribute("minimum", 0)
+        property.setAttribute("maximum", self.canvas.width())
+        property.setValue(item.x())
         self.addProperty(property, "xpos")
 
-        property = self.doubleManager.addProperty(self.tr("Position Y"))
-        self.doubleManager.setRange(property, 0, self.canvas.height())
-        self.doubleManager.setValue(property, item.y())
+        property = self.variantManager.addProperty(QVariant.Double, self.tr("Position Y"))
+        property.setAttribute("minimum", 0)
+        property.setAttribute("maximum", self.canvas.height())
+        property.setValue(item.y())
         self.addProperty(property, "ypos")
 
-        property = self.doubleManager.addProperty(self.tr("Position Z"))
-        self.doubleManager.setRange(property, 0, 256)
-        self.doubleManager.setValue(property, item.z())
+        property = self.variantManager.addProperty(QVariant.Double, self.tr("Position Z"))
+        property.setAttribute("minimum", 0)
+        property.setAttribute("maximum", 256)
+        property.setValue(item.z())
         self.addProperty(property, "zpos")
 
         if (item.rtti() == RttiValues.Rtti_Rectangle):
             i = item
 
-            property = self.colorManager.addProperty(self.tr("Brush Color"))
-            self.colorManager.setValue(property, i.brush().color())
+            property = self.variantManager.addProperty(QVariant.Color, self.tr("Brush Color"))
+            property.setValue(i.brush().color())
             self.addProperty(property, "brush")
 
-            property = self.colorManager.addProperty(self.tr("Pen Color"))
-            self.colorManager.setValue(property, i.pen().color())
+            property = self.variantManager.addProperty(QVariant.Color, self.tr("Pen Color"))
+            property.setValue(i.pen().color())
             self.addProperty(property, "pen")
 
-            property = self.sizeManager.addProperty(self.tr("Size"))
-            self.sizeManager.setValue(property, i.size())
+            property = self.variantManager.addProperty(QVariant.Size, self.tr("Size"))
+            property.setValue(i.size())
             self.addProperty(property, "size")
         elif (item.rtti() == RttiValues.Rtti_Line):
             i = item
 
-            property = self.colorManager.addProperty(self.tr("Pen Color"))
-            self.colorManager.setValue(property, i.pen().color())
+            property = self.variantManager.addProperty(QVariant.Color, self.tr("Pen Color"))
+            property.setValue(i.pen().color())
             self.addProperty(property, "pen")
 
-            property = self.pointManager.addProperty(self.tr("Vector"))
-            self.pointManager.setValue(property, i.endPoint())
+            property = self.variantManager.addProperty(QVariant.Point, self.tr("Vector"))
+            property.setValue(i.endPoint())
             self.addProperty(property, "endpoint")
         elif (item.rtti() == RttiValues.Rtti_Ellipse):
             i = item
 
-            property = self.colorManager.addProperty(self.tr("Brush Color"))
-            self.colorManager.setValue(property, i.brush().color())
+            property = self.variantManager.addProperty(QVariant.Color, self.tr("Brush Color"))
+            property.setValue(i.brush().color())
             self.addProperty(property, "brush")
 
-            property = self.sizeManager.addProperty(self.tr("Size"))
-            self.sizeManager.setValue(property, QSize(i.width(), i.height()))
-            self.sizeManager.setRange(property, QSize(0, 0), QSize(1000, 1000))
+            property = self.variantManager.addProperty(QVariant.Size, self.tr("Size"))
+            property.setValue(QSize(i.width(), i.height()))
             self.addProperty(property, "size")
         elif (item.rtti() == RttiValues.Rtti_Text):
             i = item
 
-            property = self.colorManager.addProperty(self.tr("Color"))
-            self.colorManager.setValue(property, i.color())
+            property = self.variantManager.addProperty(QVariant.Color, self.tr("Color"))
+            property.setValue(i.color())
             self.addProperty(property, "color")
 
-            property = self.stringManager.addProperty(self.tr("Text"))
-            self.stringManager.setValue(property, i.text())
+            property = self.variantManager.addProperty(QVariant.String, self.tr("Text"))
+            property.setValue(i.text())
             self.addProperty(property, "text")
 
-            property = self.fontManager.addProperty(self.tr("Font"))
-            self.fontManager.setValue(property, i.font())
+            property = self.variantManager.addProperty(QVariant.Font, self.tr("Font"))
+            property.setValue(i.font())
             self.addProperty(property, "font")
 
     def addProperty(self, property, id):
@@ -383,55 +353,52 @@ class MainWindow(QMainWindow):
 
         if (not self.currentItem or self.currentItem.isNone()):
             return
-        tp = type(value)
+
         id = self.propertyToId[property]
-        if tp == float:
-            if (id == "xpos"):
-                self.currentItem.setX(value)
-            elif (id == "ypos"):
-                self.currentItem.setY(value)
-            elif (id == "zpos"):
-                self.currentItem.setZ(value)
-        elif tp == str:
-            if (id == "text"):
-                if (self.currentItem.rtti() == RttiValues.Rtti_Text):
-                    i = self.currentItem
-                    i.setText(value)
-        elif tp == QColor:
-            if (id == "color"):
-                if (self.currentItem.rtti() == RttiValues.Rtti_Text):
-                    i = self.currentItem
-                    i.setColor(value)
-            elif (id == "brush"):
-                if (self.currentItem.rtti() == RttiValues.Rtti_Rectangle or self.currentItem.rtti() == RttiValues.Rtti_Ellipse):
-                    i = self.currentItem
-                    b = QBrush(i.brush())
-                    b.setColor(value)
-                    i.setBrush(b)
-            elif (id == "pen"):
-                if (self.currentItem.rtti() == RttiValues.Rtti_Rectangle or self.currentItem.rtti() == RttiValues.Rtti_Line):
-                    i = self.currentItem
-                    p = QPen(i.pen())
-                    p.setColor(value)
-                    i.setPen(p)
-        elif tp == QFont:
-            if (id == "font"):
-                if (self.currentItem.rtti() == RttiValues.Rtti_Text):
-                    i = self.currentItem
-                    i.setFont(value)
-        elif tp == QPoint:
+        if (id == "xpos"):
+            self.currentItem.setX(value)
+        elif (id == "ypos"):
+            self.currentItem.setY(value)
+        elif (id == "zpos"):
+            self.currentItem.setZ(value)
+        elif (id == "text"):
+            if (self.currentItem.rtti() == RttiValues.Rtti_Text):
+                i = self.currentItem
+                i.setText(value)
+        elif (id == "color"):
+            if (self.currentItem.rtti() == RttiValues.Rtti_Text):
+                i = self.currentItem
+                i.setColor(value)
+        elif (id == "brush"):
+            if (self.currentItem.rtti() == RttiValues.Rtti_Rectangle or self.currentItem.rtti() == RttiValues.Rtti_Ellipse):
+                i = self.currentItem
+                b = QBrush(i.brush())
+                b.setColor(value)
+                i.setBrush(b)
+        elif (id == "pen"):
+            if (self.currentItem.rtti() == RttiValues.Rtti_Rectangle or self.currentItem.rtti() == RttiValues.Rtti_Line):
+                i = self.currentItem
+                p = QPen(i.pen())
+                p.setColor(value)
+                i.setPen(p)
+        elif (id == "font"):
+            if (self.currentItem.rtti() == RttiValues.Rtti_Text):
+                i = self.currentItem
+                i.setFont(value)
+        elif (id == "endpoint"):
             if (self.currentItem.rtti() == RttiValues.Rtti_Line):
                 i = self.currentItem
-                if (id == "endpoint"):
-                    i.setPoints(i.startPoint().x(), i.startPoint().y(), value.x(), value.y())
-        elif tp == QSize:
-            if (id == "size"):
-                if (self.currentItem.rtti() == RttiValues.Rtti_Rectangle):
-                    i = self.currentItem
-                    i.setSize(value.width(), value.height())
-                elif (self.currentItem.rtti() == RttiValues.Rtti_Ellipse):
-                    i = self.currentItem
-                    i.setSize(value.width(), value.height())
+                p = value
+                i.setPoints(i.startPoint().x(), i.startPoint().y(), p.x(), p.y())
+        elif (id == "size"):
+            if (self.currentItem.rtti() == RttiValues.Rtti_Rectangle):
+                i = self.currentItem
+                s = value
+                i.setSize(s.width(), s.height())
+            elif (self.currentItem.rtti() == RttiValues.Rtti_Ellipse):
+                i = self.currentItem
+                s = value
+                i.setSize(s.width(), s.height())
         self.canvas.update()
 
 if __name__ == '__main__':

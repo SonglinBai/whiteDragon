@@ -50,8 +50,8 @@ from PyQt5.QtWidgets import (
     QAction,
     QStyle)
 from PyQt5.QtGui import QIcon, QPainter, QCursor, QImage, QPixmap, QTextOption, QKeySequence, QFont
-from QtPropertyBrowser.libqt5.pyqtcore import QList, QMap
-import QtPropertyBrowser.QtProperty.qtpropertybrowser_rc
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QList, QMap
+
 
 class QtCursorDatabase():
     def __init__(self):

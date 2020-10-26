@@ -1,30 +1,15 @@
 import sys
 
-from Qt.QtCore import Qt
+from Qt.QtCore import Qt, QPointF
+from PyQt5.QtCore import QVariant
 from Qt.QtGui import QIcon, QCursor
 from Qt.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
-                               QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem)
-from UI.testFrame import testFrame
-from Nodz.nodz_main import Nodz
-from QtPropertyBrowser.QtProperty.qtpropertymanager import (
-    QtBoolPropertyManager,
-    QtIntPropertyManager,
-    QtStringPropertyManager,
-    QtSizePropertyManager,
-    QtRectPropertyManager,
-    QtSizePolicyPropertyManager,
-    QtEnumPropertyManager,
-    QtGroupPropertyManager
-)
-from QtPropertyBrowser.QtProperty.qteditorfactory import (    QtCheckBoxFactory,
-    QtSpinBoxFactory,
-    QtSliderFactory,
-    QtScrollBarFactory,
-    QtLineEditFactory,
-    QtEnumEditorFactory
-)
-from QtPropertyBrowser.QtProperty.qtgroupboxpropertybrowser import QtGroupBoxPropertyBrowser
-from QtPropertyBrowser.libqt5.pyqtcore import QMap, QList
+                          QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem)
+from UI.Nodz.nodz_main import Nodz
+from UI.QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
+from UI.QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QMap, QList
+
 
 class MainWindow(QMainWindow):
     def __init__(self):
@@ -107,6 +92,13 @@ class MainWindow(QMainWindow):
         self.menuEdit.addAction(self.actPaste)
         menubar.addMenu(self.menuEdit)
 
+        # add actions to Run menu
+        self.menuRun = QMenu(self.tr('Run'))
+        self.actRun = QAction(self.tr('Run'))
+        self.actRun.setShortcut('Ctrl+R')
+        self.menuRun.addAction(self.actRun)
+        menubar.addMenu(self.menuRun)
+
     def initLayout(self):
         self.mainWidget = QWidget()
         self.mainLayout = QHBoxLayout(self)
@@ -130,7 +122,6 @@ class MainWindow(QMainWindow):
         sp = QSplitter(Qt.Vertical)
         sp.addWidget(self.itemListFrame)
         sp.addWidget(self.resultFrame)
-        sp.setMinimumWidth(300)
 
         splitter = QSplitter(Qt.Horizontal)
 
@@ -167,6 +158,7 @@ class NodeListWidget(QListWidget):
     def showClickedItem(self, item: QListWidgetItem):
         print(item.text())
 
+
 class ResultListWidget(QListWidget):
     def __init__(self):
         super(ResultListWidget, self).__init__()
@@ -193,78 +185,67 @@ class ResultListWidget(QListWidget):
     def showClickedItem(self, item: QListWidgetItem):
         print(item.text())
 
-class PropertyBrowserWidget(QtGroupBoxPropertyBrowser):
-    def __init__(self,parent):
+
+class PropertyBrowserWidget(QtTreePropertyBrowser):
+    def __init__(self, parent):
         super(PropertyBrowserWidget, self).__init__()
-        self.testData(parent)
+        self.initData(parent)
 
-    def testData(self,w):
-        boolManager = QtBoolPropertyManager(w)
-        intManager = QtIntPropertyManager(w)
-        stringManager = QtStringPropertyManager(w)
-        sizeManager = QtSizePropertyManager(w)
-        rectManager = QtRectPropertyManager(w)
-        sizePolicyManager = QtSizePolicyPropertyManager(w)
-        enumManager = QtEnumPropertyManager(w)
-        groupManager = QtGroupPropertyManager(w)
+    def initData(self, parent):
+        variantManager = QtVariantPropertyManager(parent)
 
-        item0 = groupManager.addProperty("QObject")
+        topItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), "Node")
 
-        item1 = stringManager.addProperty("objectName")
-        item0.addSubProperty(item1)
+        labelItem = variantManager.addProperty(QVariant.String, "label")
+        topItem.addSubProperty(labelItem)
 
-        item2 = boolManager.addProperty("enabled")
-        item0.addSubProperty(item2)
+        # portItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(),"port")
 
-        item3 = rectManager.addProperty("geometry")
-        item0.addSubProperty(item3)
+        """
+            add type selection item 
+        """
+        typeItem = variantManager.addProperty(QtVariantPropertyManager.enumTypeId(), "type")
 
-        item4 = sizePolicyManager.addProperty("sizePolicy")
-        item0.addSubProperty(item4)
-
-        item5 = sizeManager.addProperty("sizeIncrement")
-        item0.addSubProperty(item5)
-
-        item7 = boolManager.addProperty("mouseTracking")
-        item0.addSubProperty(item7)
-
-        item8 = enumManager.addProperty("direction")
         enumNames = QList()
-        enumNames.append("Up")
-        enumNames.append("Right")
-        enumNames.append("Down")
-        enumNames.append("Left")
+        enumNames.append("PC")
+        enumNames.append("Server")
 
-        enumManager.setEnumNames(item8, enumNames)
+        typeItem.setAttribute("enumNames", enumNames)
         enumIcons = QMap()
-        enumIcons[0] = QIcon(":/demo/images/up.png")
-        enumIcons[1] = QIcon(":/demo/images/right.png")
-        enumIcons[2] = QIcon(":/demo/images/down.png")
-        enumIcons[3] = QIcon(":/demo/images/left.png")
-        enumManager.setEnumIcons(item8, enumIcons)
-        item0.addSubProperty(item8)
+        enumIcons[0] = QIcon('UI/icon/pc.png')
+        enumIcons[1] = QIcon('UI/icon/server.png')
+        typeItem.setAttribute("enumIcons", enumIcons)
 
-        item9 = intManager.addProperty("value")
-        intManager.setRange(item9, -100, 100)
-        item0.addSubProperty(item9)
+        topItem.addSubProperty(typeItem)
 
-        checkBoxFactory = QtCheckBoxFactory(self)
-        spinBoxFactory = QtSpinBoxFactory(self)
-        sliderFactory = QtSliderFactory(self)
-        scrollBarFactory = QtScrollBarFactory(self)
-        lineEditFactory = QtLineEditFactory(self)
-        comboBoxFactory = QtEnumEditorFactory(self)
+        """
+            add permission table
+        """
+        permissionItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), "Permission Table")
+        # for i in range(10):
+        #     item = variantManager.addProperty(QVariant.String, "test")
+        #     item.setValue(i)
+        #     item.setAttribute("readOnly", True)
+        #     permissionItem.addSubProperty(item)
+        topItem.addSubProperty(permissionItem)
 
-        self.setFactoryForManager(boolManager, checkBoxFactory)
-        self.setFactoryForManager(intManager, spinBoxFactory)
-        self.setFactoryForManager(stringManager, lineEditFactory)
-        self.setFactoryForManager(sizeManager.subIntPropertyManager(), spinBoxFactory)
-        self.setFactoryForManager(rectManager.subIntPropertyManager(), spinBoxFactory)
-        self.setFactoryForManager(sizePolicyManager.subIntPropertyManager(), spinBoxFactory)
-        self.setFactoryForManager(sizePolicyManager.subEnumPropertyManager(), comboBoxFactory)
-        self.setFactoryForManager(enumManager, comboBoxFactory)
+        attempListItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), "Attack Template")
+        # for i in range(10):
+        #     item = variantManager.addProperty(QVariant.String, "label")
+        #     item.setValue("test"+str(i))
+        #     item.setAttribute("readOnly", True)
+        #     attempListItem.addSubProperty(item)
+        topItem.addSubProperty(attempListItem)
 
-        self.addProperty(item0)
+
+
+
+        variantFactory = QtVariantEditorFactory(parent)
+
+        self.setFactoryForManager(variantManager, variantFactory)
+
+        self.addProperty(topItem)
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

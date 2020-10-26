@@ -39,7 +39,7 @@
 ##
 #############################################################################
 
-from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractPropertyBrowser, QtBrowserItem
+from UI.QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractPropertyBrowser, QtBrowserItem
 from PyQt5.QtCore import Qt, QRect, QSize, QEvent, QCoreApplication, pyqtSignal, pyqtProperty
 from PyQt5.QtWidgets import (
     QHBoxLayout, QItemDelegate,
@@ -56,7 +56,7 @@ from PyQt5.QtGui import (
     QFontMetrics, QColor,
     QPixmap)
 
-from QtPropertyBrowser.libqt5.pyqtcore import QList, QMap
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QList, QMap
 
 ## Draw an icon indicating opened/closing branches
 def drawIndicatorIcon(palette, style):
@@ -358,9 +358,9 @@ class QtPropertyEditorView(QTreeWidget):
                 opt.palette.setColor(QPalette.AlternateBase, c.lighter(112))
 
         super(QtPropertyEditorView, self).drawRow(painter, opt, index)
-        color = QApplication.style().styleHint(QStyle.SH_Table_GridLineColor, opt)
+        # color = QApplication.style().styleHint(QStyle.SH_Table_GridLineColor, opt)
         painter.save()
-        painter.setPen(QPen(QColor(-color)))
+        painter.setPen(QPen(QColor(205,205,205,255)))
         painter.drawLine(opt.rect.x(), opt.rect.bottom(), opt.rect.right(), opt.rect.bottom())
         painter.restore()
 
