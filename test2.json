@@ -1,5 +1,5 @@
 {
-    "NAME": "GraphB",
+    "NAME": "GraphA",
     "NODES": [
         {
             "label": "nodeA",
@@ -9,8 +9,8 @@
             ],
             "attemp": [],
             "position": [
-                182.45125000000007,
-                1284.4901249999998
+                533.0,
+                830.0
             ]
         },
         {
@@ -26,8 +26,8 @@
                         "CVE-1"
                     ],
                     "requestPermission": 1,
-                    "prob": 1,
-                    "result": 0.5
+                    "prob": 0.5,
+                    "result": 1
                 },
                 {
                     "label": "B(v1)",
@@ -35,13 +35,13 @@
                         "CVE-2"
                     ],
                     "requestPermission": 0,
-                    "prob": 1,
-                    "result": 0.2
+                    "prob": 0.2,
+                    "result": 1
                 }
             ],
             "position": [
-                434.4393749999999,
-                889.7027500000002
+                551.0,
+                1050.0
             ]
         },
         {
@@ -57,8 +57,8 @@
                         "CVE-3"
                     ],
                     "requestPermission": 0,
-                    "prob": 1,
-                    "result": 0.1
+                    "prob": 0.1,
+                    "result": 1
                 },
                 {
                     "label": "C(v1)",
@@ -66,8 +66,8 @@
                         "CVE-4"
                     ],
                     "requestPermission": 1,
-                    "prob": 2,
-                    "result": 0.3
+                    "prob": 0.3,
+                    "result": 2
                 },
                 {
                     "label": "C(v2)",
@@ -75,13 +75,13 @@
                         "CVE-5"
                     ],
                     "requestPermission": 2,
-                    "prob": 3,
-                    "result": 0.7
+                    "prob": 0.7,
+                    "result": 3
                 }
             ],
             "position": [
-                796.0,
-                884.5
+                914.0,
+                1137.0
             ]
         },
         {
@@ -97,13 +97,13 @@
                         "CVE-6"
                     ],
                     "requestPermission": 0,
-                    "prob": 0,
-                    "result": 0.4
+                    "prob": 0.4,
+                    "result": 0
                 }
             ],
             "position": [
-                238.28425000000016,
-                641.5000000000002
+                758.0,
+                742.0
             ]
         },
         {
@@ -119,13 +119,13 @@
                         "CVE-7"
                     ],
                     "requestPermission": 0,
-                    "prob": 0,
-                    "result": 0.2
+                    "prob": 0.2,
+                    "result": 0
                 }
             ],
             "position": [
-                665.0,
-                1107.5
+                1158.0,
+                971.0
             ]
         },
         {
@@ -141,13 +141,13 @@
                         "CVE-8"
                     ],
                     "requestPermission": 0,
-                    "prob": 0,
-                    "result": 0.9
+                    "prob": 0.9,
+                    "result": 0
                 }
             ],
             "position": [
-                611.0,
-                747.5
+                986.0,
+                771.0
             ]
         }
     ],
@@ -172,6 +172,5 @@
             "nodeF"
         ],
         "nodeF": []
-    },
-    "LASTFILEPATH": "/Users/bais1/Desktop/whiteDragon/test2.json"
+    }
 }
