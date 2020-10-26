@@ -72,7 +72,7 @@ from PyQt5.QtWidgets import (
     QApplication, 
     QScrollArea
 )
-from QtPropertyBrowser.libqt5.pyqtcore import QSet, QList
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QSet, QList
 from enum import Enum
 
 class QPolygonEx(QPolygon):

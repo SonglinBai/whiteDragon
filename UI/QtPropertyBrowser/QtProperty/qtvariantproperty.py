@@ -39,7 +39,7 @@
 ##
 #############################################################################
 
-from QtPropertyBrowser.QtProperty.qteditorfactory import (
+from UI.QtPropertyBrowser.QtProperty.qteditorfactory import (
     QtAbstractEditorFactory,
     QtSpinBoxFactory,
     QtCheckBoxFactory,
@@ -55,8 +55,8 @@ from QtPropertyBrowser.QtProperty.qteditorfactory import (
     QtColorEditorFactory,
     QtFontEditorFactory
     )
-from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtProperty
-from QtPropertyBrowser.QtProperty.qtpropertymanager import (
+from UI.QtPropertyBrowser.QtProperty.qtpropertybrowser import QtProperty
+from UI.QtPropertyBrowser.QtProperty.qtpropertymanager import (
     QtAbstractPropertyManager,
     QtIntPropertyManager,
     QtBoolPropertyManager,
@@ -82,7 +82,7 @@ from QtPropertyBrowser.QtProperty.qtpropertymanager import (
     QtCursorPropertyManager,
     QtGroupPropertyManager
     )
-from QtPropertyBrowser.libqt5.pyqtcore import QMap, QMapMap, qMetaTypeId
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QMap, QMapMap, qMetaTypeId
 from PyQt5.QtCore import QVariant, pyqtSignal, QUrl
 from PyQt5.QtGui import QIcon, QKeySequence
 
@@ -1126,7 +1126,7 @@ class QtVariantPropertyManager(QtAbstractPropertyManager):
             if (attribute == self.d_ptr.m_enumNamesAttribute):
                 return manager.enumNames(internProp)
             if (attribute == self.d_ptr.m_enumIconsAttribute):
-                v = QVariant(self.enumManager.enumIcons(internProp))
+                v = manager.enumIcons(internProp)
                 return v
             return None
         elif tm == QtFlagPropertyManager:

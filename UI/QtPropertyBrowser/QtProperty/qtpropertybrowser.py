@@ -44,7 +44,7 @@ from PyQt5.QtCore import QObject, pyqtSignal
 from PyQt5.QtWidgets import QLineEdit, QWidget
 from PyQt5.QtGui import QIcon, QColor
 
-from QtPropertyBrowser.libqt5.pyqtcore import QList, QMap, QMapList, QMapMapList
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QList, QMap, QMapList, QMapMapList
 
 g_viewToManagerToFactory = None
 def m_viewToManagerToFactory():

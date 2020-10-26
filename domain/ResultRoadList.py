@@ -1,31 +1,36 @@
-
 from domain.Node import *
 from domain.Attemp import *
 
+
 class block(object):
-    def __init__(self,data:[Node,Attemp]):
+    def __init__(self, data: [Node, Attemp]):
         self.data = data
-        self.next:block = None
-        self.prev:block = None
+        self.next: block = None
+        self.prev: block = None
+
 
 class DoubleList(object):
     def __init__(self):
-        self.head = block([1])#头结点，初始概率为1
+        self.head = block([1])  # 头结点，初始概率为1
         self.length = 0
         self.allLabelName = []
 
-    def travel(self):#循环遍历所有结点
-        cur = self.head #创立游标
+    def travel(self):  # 循环遍历所有结点
+        result = ""
+        cur = self.head  # 创立游标
         for i in range(self.length):
-            NodeName = cur.next.data[0].label #结点名字
-            AttempName = cur.next.data[1].label #漏洞名字
-            prob = cur.next.data[1].prob    #漏洞概率
+            NodeName = cur.next.data[0].label  # 结点名字
+            AttempName = cur.next.data[1].label  # 漏洞名字
+            prob = cur.next.data[1].prob  # 漏洞概率
             cur = cur.next
-            print("(%s,%s,%s)->"%(NodeName,AttempName,prob),end=" ")
+            # print("(%s,%s,%s)->" % (NodeName, AttempName, prob), end=" ")
+            result += str("(%s,%s,%s)->" % (NodeName, AttempName, prob))
+        result += str(self.head.data[0])
+        return result
 
-    def append(self, newData:[Node,Attemp]):#在结尾处添加新的结点
+    def append(self, newData: [Node, Attemp]):  # 在结尾处添加新的结点
         NewBlock = block(newData)
-        cur = self.head #创建游标
+        cur = self.head  # 创建游标
         if self.length == 0:
             self.head.next = NewBlock
             NewBlock.prev = self.head
@@ -41,8 +46,7 @@ class DoubleList(object):
             self.length += 1
             self.head.data[0] = self.head.data[0] * newData[1].prob
 
-
-    def coverAppend(self,newData:[Node,Attemp]):#用以计算一个结点的路径概率
+    def coverAppend(self, newData: [Node, Attemp]):  # 用以计算一个结点的路径概率
         NewBlock = block(newData)
         cur = self.head  # 创建游标
         if self.length == 0:
@@ -60,19 +64,19 @@ class DoubleList(object):
             self.length += 1
             self.head.data[0] = self.head.data[0] * newData[1].prob
 
-    def findBlock(self,AttempName:Attemp):#查询漏洞是否在路径中
-        cur = self.head.next #创建游标
+    def findBlock(self, AttempName: Attemp):  # 查询漏洞是否在路径中
+        cur = self.head.next  # 创建游标
         for i in range(self.length):
             if cur.data[1].label == AttempName.label:
-           #     print("find out!")
+                #     print("find out!")
                 return cur
             else:
                 cur = cur.next
 
-       # print("fail !")
+        # print("fail !")
         return False
 
-    def findNodeAttmp(self,node:Node):#查询一个结点的最后路径
+    def findNodeAttmp(self, node: Node):  # 查询一个结点的最后路径
         cur = self.head.next
         signal = 0
         for i in range(self.length):
@@ -83,42 +87,38 @@ class DoubleList(object):
                 if signal == 0:
                     cur = cur.next
                 else:
-                    #print(cur.prev.data[0].label)
-                   # print(cur.prev.data[1].label)
+                    # print(cur.prev.data[0].label)
+                    # print(cur.prev.data[1].label)
                     return cur.prev
 
 
 class AllListGroup(object):
-   def __init__(self):
-        self.ListGroup = [] #所有路径的列表
-        self.ListNumber = 0 #所有路径的个数
+    def __init__(self):
+        self.ListGroup = []  # 所有路径的列表
+        self.ListNumber = 0  # 所有路径的个数
 
-   def CopyListGroup(self,CopiedRoad:DoubleList,EndCopyBlock:block):
-       #被复制的双向链表， 复制到哪一个结点，复制后的结果
-       NewRoad = DoubleList()
-       NewRoad.head = block([1])
-       curCopied = CopiedRoad.head #创建复制表的游标
-       NewRoad.head = copy.deepcopy(CopiedRoad.head)
-       NewRoad.head.data[0] = 1
-       for i in range(CopiedRoad.length):
-           if curCopied.next.data == EndCopyBlock.data:
-               data = curCopied.next.data
-               NewRoad.append(data)
-               self.ListGroup.append(NewRoad)
-               #print("done")
-               return True
-           else:
-               data = curCopied.next.data
-               NewRoad.append(data)
-               curCopied = curCopied.next
+    def CopyListGroup(self, CopiedRoad: DoubleList, EndCopyBlock: block):
+        # 被复制的双向链表， 复制到哪一个结点，复制后的结果
+        NewRoad = DoubleList()
+        NewRoad.head = block([1])
+        curCopied = CopiedRoad.head  # 创建复制表的游标
+        NewRoad.head = copy.deepcopy(CopiedRoad.head)
+        NewRoad.head.data[0] = 1
+        for i in range(CopiedRoad.length):
+            if curCopied.next.data == EndCopyBlock.data:
+                data = curCopied.next.data
+                NewRoad.append(data)
+                self.ListGroup.append(NewRoad)
+                # print("done")
+                return True
+            else:
+                data = curCopied.next.data
+                NewRoad.append(data)
+                curCopied = curCopied.next
 
-   def listGroupAppend(self,road:DoubleList):
-       self.ListGroup.append(road)
-       self.ListNumber = self.ListNumber + 1
-
-
-
-
+    def listGroupAppend(self, road: DoubleList):
+        self.ListGroup.append(road)
+        self.ListNumber = self.ListNumber + 1
 
 
 """

@@ -81,8 +81,8 @@ def loadGraph(filePath):
         nodeCreated = nodz.createNode(label, 'node_default', position, False)
         list = []
         for attemp in attempList:
-            list.append(Attemp(attemp['label'], attemp['vulneList'], attemp['requestPermission'], attemp['prob'],
-                               attemp['result']))
+            list.append(Attemp(attemp['label'], attemp['vulneList'], attemp['requestPermission'],
+                               attemp['result'], attemp['prob']))
         nodes.append(Node(label, type, port, list))
 
         nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=node.__class__, plug=False)
@@ -103,6 +103,17 @@ def loadGraph(filePath):
     nodz.signal_GraphLoaded.emit()
 
     return graph
+
+def CaculateGraph(graph):
+    road = DoubleList()
+    aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1.00)
+    road.append([graph.getNodeByLabel('nodeA'),aAttempV0])
+    graph.CoreAlgorithm(graph.getNodeByLabel('nodeA'), road)
+    updateResult(graph.AllRoad.ListGroup)
+
+def updateResult(result: List):
+    for road in result:
+        mainWindow.resultFrame.addItem(road.travel())
 
 
 def DeleteNode():
@@ -232,7 +243,11 @@ def on_actOpenTriggered():
     # print(os.path.dirname(filePath))
     loadGraph(filePath)
 
+@QtCore.Slot()
+def on_actRunTriggered():
+    CaculateGraph(graph)
 
+mainWindow.actRun.triggered.connect(on_actRunTriggered)
 mainWindow.actSaveAs.triggered.connect(on_actSaveAsTriggered)
 mainWindow.actSave.triggered.connect(on_actSaveTriggered)
 mainWindow.actOpenFile.triggered.connect(on_actOpenTriggered)
@@ -296,11 +311,14 @@ nodz.signal_KeyPressed.connect(on_keyPressed)
 # nodz.createNode('nodeF')
 # saveGraph(GraphA, "./test.json")
 
+# loadGraph("./test.json")
+#
 # aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
 #
 # road = DoubleList()
-# road.append([graph.getNodeByLabel('nodeA'),aAttempV0])
-# graph.CoreAlgorithm(graph.getNodeByLabel('nodeA'), road)
+# Anode = graph.getNodeByLabel('nodeA')
+# road.append([Anode,aAttempV0])
+# graph.CoreAlgorithm(Anode, road)
 # for i in graph.AllRoad.ListGroup:
 #     i.travel()
 #     print(i.head.data[0])

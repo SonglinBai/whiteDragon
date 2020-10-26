@@ -39,14 +39,14 @@
 ##
 #############################################################################
 
-from QtPropertyBrowser.QtProperty.qtpropertybrowserutils import (
+from UI.QtPropertyBrowser.QtProperty.qtpropertybrowserutils import (
     QtKeySequenceEdit, 
     QtBoolEdit,
     QtPropertyBrowserUtils
     )
-from QtPropertyBrowser.libqt5.pyqtcore import QMapList, QList, QMap
-from QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractEditorFactory
-from QtPropertyBrowser.QtProperty.qtpropertymanager import QtEnumPropertyManager, cursorDatabase
+from UI.QtPropertyBrowser.libqt5.pyqtcore import QMapList, QList, QMap
+from UI.QtPropertyBrowser.QtProperty.qtpropertybrowser import QtAbstractEditorFactory
+from UI.QtPropertyBrowser.QtProperty.qtpropertymanager import QtEnumPropertyManager, cursorDatabase
 from PyQt5.QtCore import Qt, QEvent, pyqtSignal
 from PyQt5.QtWidgets import (
     QStyle,

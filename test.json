@@ -9,8 +9,8 @@
             ],
             "attemp": [],
             "position": [
-                741.0,
-                922.0
+                684.0,
+                886.5
             ]
         },
         {
@@ -40,8 +40,8 @@
                 }
             ],
             "position": [
-                666.0,
-                1131.0
+                566.0,
+                1118.5
             ]
         },
         {
@@ -80,8 +80,8 @@
                 }
             ],
             "position": [
-                1096.0,
-                922.0
+                996.0,
+                909.5
             ]
         },
         {
@@ -102,8 +102,8 @@
                 }
             ],
             "position": [
-                702.0,
-                712.0
+                717.0,
+                690.5
             ]
         },
         {
@@ -124,8 +124,8 @@
                 }
             ],
             "position": [
-                965.0,
-                1145.0
+                865.0,
+                1132.5
             ]
         },
         {
@@ -146,32 +146,27 @@
                 }
             ],
             "position": [
-                911.0,
-                785.0
+                990.0,
+                718.5
             ]
         }
     ],
     "CONNECTION": {
-        "nodeA": [
-            "nodeB",
-            "nodeC",
-            "nodeD"
-        ],
+        "nodeA": [],
         "nodeB": [
-            "nodeC",
-            "nodeE"
+            "nodeE",
+            "nodeC"
         ],
         "nodeC": [
             "nodeE"
         ],
         "nodeD": [
-            "nodeC",
-            "nodeF"
+            "nodeF",
+            "nodeC"
         ],
         "nodeE": [
             "nodeF"
         ],
         "nodeF": []
-    },
-    "LASTFILEPATH": "/Users/bais1/Desktop/whiteDragon/test.json"
+    }
 }

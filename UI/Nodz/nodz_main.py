@@ -1,9 +1,7 @@
 import os
-import re
-import json
 
 from Qt import QtGui, QtCore, QtWidgets
-import Nodz.nodz_utils as utils
+import UI.Nodz.nodz_utils as utils
 
 
 
