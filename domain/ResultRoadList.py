@@ -23,7 +23,7 @@ class DoubleList(object):
             AttempName = cur.next.data[1].label  # 漏洞名字
             prob = cur.next.data[1].prob  # 漏洞概率
             cur = cur.next
-            # print("(%s,%s,%s)->" % (NodeName, AttempName, prob), end=" ")
+            print("(%s,%s,%s)->" % (NodeName, AttempName, prob), end=" ")
             result += str("(%s,%s,%s)->" % (NodeName, AttempName, prob))
         result += str(self.head.data[0])
         return result
