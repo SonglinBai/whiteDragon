@@ -20,7 +20,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_1",
                     "socket": true,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'int'>",
@@ -29,7 +29,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_1",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'str'>",
@@ -38,7 +38,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_1",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'str'>",
@@ -47,7 +47,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_2",
                     "socket": true,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'int'>",
@@ -56,7 +56,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_2",
                     "socket": true,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'str'>",
@@ -65,7 +65,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_3",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'str'>",
@@ -74,7 +74,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_3",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 }
             ],
             "position": [
@@ -93,7 +93,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_1",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'int'>",
@@ -102,7 +102,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_1",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'int'>",
@@ -111,7 +111,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_2",
                     "socket": true,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'str'>",
@@ -120,7 +120,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_2",
                     "socket": true,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'int'>",
@@ -157,7 +157,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_1",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'int'>",
@@ -166,7 +166,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_1",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'int'>",
@@ -175,7 +175,7 @@
                     "plugMaxConnections": -1,
                     "preset": "attr_preset_2",
                     "socket": false,
-                    "socketMaxConnections": 1
+                    "socketMaxConnections": -1
                 },
                 {
                     "dataType": "<class 'int'>",

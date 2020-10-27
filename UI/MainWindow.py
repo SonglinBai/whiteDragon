@@ -4,7 +4,7 @@ from Qt.QtCore import Qt, QPointF
 from PyQt5.QtCore import QVariant
 from Qt.QtGui import QIcon, QCursor
 from Qt.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
-                          QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem)
+                          QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem, QAbstractItemView)
 from UI.Nodz.nodz_main import Nodz
 from UI.QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
 from UI.QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
@@ -104,19 +104,19 @@ class MainWindow(QMainWindow):
         self.mainLayout = QHBoxLayout(self)
 
         self.itemListFrame = NodeListWidget()
+        self.itemListFrame.setSelectionMode(QAbstractItemView.ExtendedSelection)
         self.itemListFrame.setFrameShape(QFrame.StyledPanel)
+
+        # connect single itemClicked to selectNode
+        self.itemListFrame.itemSelectionChanged.connect(self.selectNodes)
 
         self.resultFrame = ResultListWidget()
         self.resultFrame.setFrameShape(QFrame.StyledPanel)
 
         self.nodz = Nodz(None)
         self.nodz.initialize()
-        # self.nodz.setFrameShape(QFrame.StyledPanel)
-        # self.nodz = testFrame('nodz')
-        # self.nodz.setFrameShape(QFrame.StyledPanel)
 
         self.PropertiesFrame = PropertyBrowserWidget(self)
-        # self.PropertiesFrame.setFrameShape(QFrame.StyledPanel)
 
         self.mainWidget.setLayout(self.mainLayout)
         sp = QSplitter(Qt.Vertical)
@@ -131,12 +131,21 @@ class MainWindow(QMainWindow):
         self.mainLayout.addWidget(splitter)
         self.setCentralWidget(self.mainWidget)
 
+    def selectNodes(self):
+        items = self.itemListFrame.selectedItems()
+        # cancel all node selection
+        for node in self.nodz.scene().nodes.keys():
+            self.nodz.scene().nodes[node].setSelected(False)
+        # select node which name is item.text()
+
+        for item in items:
+            self.nodz.scene().nodes[item.text()].setSelected(True)
+
 
 class NodeListWidget(QListWidget):
     def __init__(self):
         super(NodeListWidget, self).__init__()
         self.createContextMenu()
-        self.itemClicked.connect(self.showClickedItem)
 
     def createContextMenu(self):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -155,8 +164,6 @@ class NodeListWidget(QListWidget):
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
 
-    def showClickedItem(self, item: QListWidgetItem):
-        print(item.text())
 
 
 class ResultListWidget(QListWidget):
@@ -245,6 +252,33 @@ class PropertyBrowserWidget(QtTreePropertyBrowser):
         self.setFactoryForManager(variantManager, variantFactory)
 
         self.addProperty(topItem)
+
+class AttackTemplateWidget(QListWidget):
+    def __init__(self):
+        super(AttackTemplateWidget, self).__init__()
+        self.createContextMenu()
+        self.itemClicked.connect(self.showClickedItem)
+
+    def createContextMenu(self):
+        self.setContextMenuPolicy(Qt.CustomContextMenu)
+        self.customContextMenuRequested.connect(self.showContextMenu)
+
+        # 创建QMenu
+        self.contextMenu = QMenu(self)
+        self.actionA = self.contextMenu.addAction(u'添加结点')
+        self.actionB = self.contextMenu.addAction(u'删除结点')
+
+    def showContextMenu(self):
+        '''''
+        右键点击时调用的函数
+        '''
+        # 菜单显示前，将它移动到鼠标点击的位置
+        self.contextMenu.move(QCursor().pos())
+        self.contextMenu.show()
+
+    def showClickedItem(self, item: QListWidgetItem):
+        print(item.text())
+
 
 
 if __name__ == "__main__":
