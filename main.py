@@ -4,7 +4,7 @@ from UI.MainWindow import MainWindow
 from domain.Graph import *
 from Qt import QtCore
 from Qt.QtGui import QIcon
-from Qt.QtWidgets import (QApplication, QFileDialog)
+from Qt.QtWidgets import (QApplication, QFileDialog, QListWidgetItem)
 import utils
 
 # 标记数字位
@@ -53,8 +53,7 @@ def addNode():
     alphabetNumber = alphabetNumber + 1
 
 
-def loadGraph(filePath):
-    global graph
+def loadGraph(graph: Graph,filePath):
     if os.path.exists(filePath):
         data = utils._loadData(filePath=filePath)
     else:
@@ -65,7 +64,7 @@ def loadGraph(filePath):
     nodesData = data["NODES"]
 
     nodes = []
-    graph = Graph(data['NAME'])
+    graph.setName(data["NAME"])
     mainWindow.itemListFrame.clear()
     nodz.clearGraph()
     for node in nodesData:
@@ -76,17 +75,21 @@ def loadGraph(filePath):
         attempList = node['attemp']
         position = QtCore.QPointF(position[0], position[1])
 
-        mainWindow.itemListFrame.addItem(label)
+        icon = 'Ui/icon/pc.png'
+        if type:
+            icon = 'UI/icon/server.png'
 
-        nodeCreated = nodz.createNode(label, 'node_default', position, False)
+        mainWindow.itemListFrame.addItem(QListWidgetItem(QIcon(icon),nodz.tr(label)))
+
+        nodeCreated = nodz.createNode(name=label, preset='node_preset_1', position=position, alternate=True)
         list = []
         for attemp in attempList:
             list.append(Attemp(attemp['label'], attemp['vulneList'], attemp['requestPermission'],
                                attemp['result'], attemp['prob']))
         nodes.append(Node(label, type, port, list))
 
-        nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=node.__class__, plug=False)
-        nodz.createAttribute(node=nodeCreated, name='out', index=1, dataType=node.__class__, socket=False)
+        nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=int, plug=False, preset="attr_preset_3")
+        nodz.createAttribute(node=nodeCreated, name='out', index=1, dataType=int, socket=False, preset="attr_preset_3")
 
     graph.setNodeList(nodes)
 
@@ -112,6 +115,7 @@ def CaculateGraph(graph):
     updateResult(graph.AllRoad.ListGroup)
 
 def updateResult(result: List):
+    mainWindow.resultFrame.clear()
     for road in result:
         mainWindow.resultFrame.addItem(road.travel())
 
@@ -239,9 +243,7 @@ def on_actOpenTriggered():
     global filePath
     filePath = QFileDialog.getOpenFileName(mainWindow, mainWindow.tr('Open'), os.path.dirname(filePath),
                                            mainWindow.tr('Json files (*.json)'))[0]
-    # print(filePath)
-    # print(os.path.dirname(filePath))
-    loadGraph(filePath)
+    loadGraph(graph,filePath)
 
 @QtCore.Slot()
 def on_actRunTriggered():
@@ -322,5 +324,7 @@ nodz.signal_KeyPressed.connect(on_keyPressed)
 # for i in graph.AllRoad.ListGroup:
 #     i.travel()
 #     print(i.head.data[0])
+
+loadGraph(graph, "./test2.json")
 
 sys.exit(app.exec_())

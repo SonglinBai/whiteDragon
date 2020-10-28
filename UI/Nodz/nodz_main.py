@@ -3,13 +3,10 @@ import os
 from Qt import QtGui, QtCore, QtWidgets
 import UI.Nodz.nodz_utils as utils
 
-
-
 defaultConfigPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'default_config.json')
 
 
 class Nodz(QtWidgets.QGraphicsView):
-
     """
     The main view for the node graph representation.
 
@@ -92,7 +89,6 @@ class Nodz(QtWidgets.QGraphicsView):
         self.contextMenu.move(QtGui.QCursor().pos())
         self.contextMenu.show()
 
-
     def addNodeHandler(self):
         print('addNode')
         self.signal_AddNode.emit(1)
@@ -100,7 +96,6 @@ class Nodz(QtWidgets.QGraphicsView):
     def DeleteNodeHandler(self):
         print('deleteNode')
         self.signal_DeleteNode.emit(2)
-
 
     def wheelEvent(self, event):
         """
@@ -113,7 +108,10 @@ class Nodz(QtWidgets.QGraphicsView):
         inFactor = 1.15
         outFactor = 1 / inFactor
 
-        if event.delta() > 0:
+        delta1 = event.pixelDelta()
+        delta2 = event.angleDelta()
+
+        if event.pixelDelta().y() > 0 or event.pixelDelta().x() > 0:
             zoomFactor = inFactor
         else:
             zoomFactor = outFactor
@@ -131,14 +129,9 @@ class Nodz(QtWidgets.QGraphicsView):
             print('right')
             self.currentState = 'ZOOM_VIEW'
             self.initMousePos = event.pos()
-            #self.zoomInitialPos = event.pos()
+            # self.zoomInitialPos = event.pos()
             self.initMouse = QtGui.QCursor.pos()
             self.setInteractive(False)
-
-            #test
-
-
-            #test
 
 
 
@@ -172,7 +165,6 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # Add selection
         elif (event.button() == QtCore.Qt.LeftButton and
-              QtCore.Qt.Key_Shift in self.pressedKeys and
               QtCore.Qt.Key_Control in self.pressedKeys):
             self.currentState = 'ADD_SELECTION'
             self._initRubberband(event.pos())
@@ -207,41 +199,41 @@ class Nodz(QtWidgets.QGraphicsView):
         """
         # Zoom.
         if self.currentState == 'ZOOM_VIEW':
-           pass
-           ''' offset = self.zoomInitialPos.x() - event.pos().x()
-
-            if offset > self.previousMouseOffset:
-                self.previousMouseOffset = offset
-                self.zoomDirection = -1
-                self.zoomIncr -= 1
-
-            elif offset == self.previousMouseOffset:
-                self.previousMouseOffset = offset
-                if self.zoomDirection == -1:
-                    self.zoomDirection = -1
-                else:
-                    self.zoomDirection = 1
-
-            else:
-                self.previousMouseOffset = offset
-                self.zoomDirection = 1
-                self.zoomIncr += 1
-
-            if self.zoomDirection == 1:
-                zoomFactor = 1.03
-            else:
-                zoomFactor = 1 / 1.03
-
-            # Perform zoom and re-center on initial click position.
-            pBefore = self.mapToScene(self.initMousePos)
-            self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
-            self.scale(zoomFactor, zoomFactor)
-            pAfter = self.mapToScene(self.initMousePos)
-            diff = pAfter - pBefore
-
-            self.setTransformationAnchor(QtWidgets.QGraphicsView.NoAnchor)
-            self.translate(diff.x(), diff.y())
-'''
+            pass
+            ''' offset = self.zoomInitialPos.x() - event.pos().x()
+ 
+             if offset > self.previousMouseOffset:
+                 self.previousMouseOffset = offset
+                 self.zoomDirection = -1
+                 self.zoomIncr -= 1
+ 
+             elif offset == self.previousMouseOffset:
+                 self.previousMouseOffset = offset
+                 if self.zoomDirection == -1:
+                     self.zoomDirection = -1
+                 else:
+                     self.zoomDirection = 1
+ 
+             else:
+                 self.previousMouseOffset = offset
+                 self.zoomDirection = 1
+                 self.zoomIncr += 1
+ 
+             if self.zoomDirection == 1:
+                 zoomFactor = 1.03
+             else:
+                 zoomFactor = 1 / 1.03
+ 
+             # Perform zoom and re-center on initial click position.
+             pBefore = self.mapToScene(self.initMousePos)
+             self.setTransformationAnchor(QtWidgets.QGraphicsView.AnchorViewCenter)
+             self.scale(zoomFactor, zoomFactor)
+             pAfter = self.mapToScene(self.initMousePos)
+             diff = pAfter - pBefore
+ 
+             self.setTransformationAnchor(QtWidgets.QGraphicsView.NoAnchor)
+             self.translate(diff.x(), diff.y())
+ '''
         # Drag canvas.
         elif self.currentState == 'DRAG_VIEW':
             offset = self.prevPos - event.pos()
@@ -466,7 +458,6 @@ class Nodz(QtWidgets.QGraphicsView):
         # Emit signal.
         self.signal_NodeSelected.emit(selected_nodes)
 
-
     ##################################################################
     # API
     ##################################################################
@@ -516,7 +507,6 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # Connect signals.
         self.scene().selectionChanged.connect(self._returnSelection)
-
 
     # NODES
     def createNode(self, name='default', preset='node_default', position=None, alternate=True):
@@ -634,9 +624,9 @@ class Nodz(QtWidgets.QGraphicsView):
         # Emit signal.
         self.signal_NodeEdited.emit(oldName, newName)
 
-
     # ATTRS
-    def createAttribute(self, node, name='default', index=-1, preset='attr_default', plug=True, socket=True, dataType=None, plugMaxConnections=-1, socketMaxConnections=-1):
+    def createAttribute(self, node, name='default', index=-1, preset='attr_default', plug=True, socket=True,
+                        dataType=None, plugMaxConnections=-1, socketMaxConnections=-1):
         """
         Create a new attribute with a given name.
 
@@ -683,7 +673,8 @@ class Nodz(QtWidgets.QGraphicsView):
             print('Attribute creation aborted !')
             return
 
-        node._createAttribute(name=name, index=index, preset=preset, plug=plug, socket=socket, dataType=dataType, plugMaxConnections=plugMaxConnections, socketMaxConnections=socketMaxConnections)
+        node._createAttribute(name=name, index=index, preset=preset, plug=plug, socket=socket, dataType=dataType,
+                              plugMaxConnections=plugMaxConnections, socketMaxConnections=socketMaxConnections)
 
         # Emit signal.
         self.signal_AttrCreated.emit(node.name, index)
@@ -804,7 +795,6 @@ class Nodz(QtWidgets.QGraphicsView):
         else:
             self.signal_AttrEdited.emit(node.name, index, index)
 
-
     # GRAPH
     def saveGraph(self, filePath='path'):
         """
@@ -841,10 +831,8 @@ class Nodz(QtWidgets.QGraphicsView):
 
                 data['NODES'][node]['attributes'].append(attrData)
 
-
         # Store connections data.
         data['CONNECTIONS'] = self.evaluateGraph()
-
 
         # Save data.
         try:
@@ -1011,7 +999,6 @@ class Nodz(QtWidgets.QGraphicsView):
 
 
 class NodeScene(QtWidgets.QGraphicsScene):
-
     """
     The scene displaying all the nodes.
 
@@ -1103,7 +1090,6 @@ class NodeScene(QtWidgets.QGraphicsScene):
 
 
 class NodeItem(QtWidgets.QGraphicsItem):
-
     """
     A graphic representation of a node containing attributes.
 
@@ -1147,12 +1133,10 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         # Methods.
         self._createStyle(config)
-        #trst
-        #self.createContextMenu()
+        # trst
+        # self.createContextMenu()
 
-
-
-#test
+    # test
     @property
     def height(self):
         """
@@ -1189,7 +1173,7 @@ class NodeItem(QtWidgets.QGraphicsItem):
         self.setFlag(QtWidgets.QGraphicsItem.ItemIsSelectable)
 
         # Dimensions.
-        self.baseWidth  = config['node_width']
+        self.baseWidth = config['node_width']
         self.baseHeight = config['node_height']
         self.attrHeight = config['node_attr_height']
         self.border = config['node_border']
@@ -1357,12 +1341,12 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         # Remove all sockets connections.
         for socket in self.sockets.values():
-            while len(socket.connections)>0:
+            while len(socket.connections) > 0:
                 socket.connections[0]._remove()
 
         # Remove all plugs connections.
         for plug in self.plugs.values():
-            while len(plug.connections)>0:
+            while len(plug.connections) > 0:
                 plug.connections[0]._remove()
 
         # Remove node.
@@ -1420,7 +1404,6 @@ class NodeItem(QtWidgets.QGraphicsItem):
                          QtCore.Qt.AlignCenter,
                          self.name)
 
-
         # Attributes.
         offset = 0
         for attr in self.attrs:
@@ -1433,18 +1416,16 @@ class NodeItem(QtWidgets.QGraphicsItem):
                                 self.baseWidth - self.border,
                                 self.attrHeight)
 
-
-
             attrData = self.attrsData[attr]
             name = attr
 
             preset = attrData['preset']
 
-
             # Attribute base.
             self._attrBrush.setColor(utils._convertDataToColor(config[preset]['bg']))
             if self.alternate:
-                self._attrBrushAlt.setColor(utils._convertDataToColor(config[preset]['bg'], True, config['alternate_value']))
+                self._attrBrushAlt.setColor(
+                    utils._convertDataToColor(config[preset]['bg'], True, config['alternate_value']))
 
             self._attrPen.setColor(utils._convertDataToColor([0, 0, 0, 0]))
             painter.setPen(self._attrPen)
@@ -1462,15 +1443,15 @@ class NodeItem(QtWidgets.QGraphicsItem):
             if nodzInst.drawingConnection:
                 if self == nodzInst.currentHoveredNode:
                     if (attrData['dataType'] != nodzInst.sourceSlot.dataType or
-                        (nodzInst.sourceSlot.slotType == 'plug' and attrData['socket'] == False or
-                         nodzInst.sourceSlot.slotType == 'socket' and attrData['plug'] == False)):
+                            (nodzInst.sourceSlot.slotType == 'plug' and attrData['socket'] == False or
+                             nodzInst.sourceSlot.slotType == 'socket' and attrData['plug'] == False)):
                         # Set non-connectable attributes color.
                         painter.setPen(utils._convertDataToColor(config['non_connectable_color']))
 
             textRect = QtCore.QRect(rect.left() + self.radius,
-                                     rect.top(),
-                                     rect.width() - 2*self.radius,
-                                     rect.height())
+                                    rect.top(),
+                                    rect.width() - 2 * self.radius,
+                                    rect.height())
             painter.drawText(textRect, QtCore.Qt.AlignVCenter, name)
 
             offset += self.attrHeight
@@ -1484,9 +1465,9 @@ class NodeItem(QtWidgets.QGraphicsItem):
         for node in nodes.values():
             node.setZValue(1)
 
-        # for item in self.scene().items():
-        #     if isinstance(item, ConnectionItem):
-        #         item.setZValue(1)
+        for item in self.scene().items():
+            if isinstance(item, ConnectionItem):
+                item.setZValue(1)
 
         self.setZValue(2)
 
@@ -1512,8 +1493,8 @@ class NodeItem(QtWidgets.QGraphicsItem):
                 currentPos = self.mapToScene(event.pos().x() - self.baseWidth / 2,
                                              event.pos().y() - self.height / 2)
 
-                snap_x = (round(currentPos.x() / gridSize) * gridSize) - gridSize/4
-                snap_y = (round(currentPos.y() / gridSize) * gridSize) - gridSize/4
+                snap_x = (round(currentPos.x() / gridSize) * gridSize) - gridSize / 4
+                snap_y = (round(currentPos.y() / gridSize) * gridSize) - gridSize / 4
                 snap_pos = QtCore.QPointF(snap_x, snap_y)
                 self.setPos(snap_pos)
 
@@ -1538,15 +1519,14 @@ class NodeItem(QtWidgets.QGraphicsItem):
         """
         nodzInst = self.scene().views()[0]
 
-        # for item in nodzInst.scene().items():
-        #     if isinstance(item, ConnectionItem):
-        #         item.setZValue(0)
+        for item in nodzInst.scene().items():
+            if isinstance(item, ConnectionItem):
+                item.setZValue(0)
 
         super(NodeItem, self).hoverLeaveEvent(event)
 
 
 class SlotItem(QtWidgets.QGraphicsItem):
-
     """
     The base class for graphics item representing attributes hook.
 
@@ -1612,15 +1592,15 @@ class SlotItem(QtWidgets.QGraphicsItem):
         if self.parentItem() == slot_item.parentItem():
             return False
 
-        #no more than maxConnections
-        if self.maxConnections>0 and len(self.connected_slots) >= self.maxConnections:
+        # no more than maxConnections
+        if self.maxConnections > 0 and len(self.connected_slots) >= self.maxConnections:
             return False
 
-        #no connection with different types
+        # no connection with different types
         if slot_item.dataType != self.dataType:
             return False
 
-        #otherwize, all fine.
+        # otherwize, all fine.
         return True
 
     def mousePressEvent(self, event):
@@ -1729,7 +1709,8 @@ class SlotItem(QtWidgets.QGraphicsItem):
         if nodzInst.drawingConnection:
             if self.parentItem() == nodzInst.currentHoveredNode:
                 painter.setBrush(utils._convertDataToColor(config['non_connectable_color']))
-                if (self.slotType == nodzInst.sourceSlot.slotType or (self.slotType != nodzInst.sourceSlot.slotType and self.dataType != nodzInst.sourceSlot.dataType)):
+                if (self.slotType == nodzInst.sourceSlot.slotType or (
+                        self.slotType != nodzInst.sourceSlot.slotType and self.dataType != nodzInst.sourceSlot.dataType)):
                     painter.setBrush(utils._convertDataToColor(config['non_connectable_color']))
                 else:
                     _penValid = QtGui.QPen()
@@ -1754,7 +1735,6 @@ class SlotItem(QtWidgets.QGraphicsItem):
 
 
 class PlugItem(SlotItem):
-
     """
     A graphics item representing an attribute out hook.
 
@@ -1823,9 +1803,9 @@ class PlugItem(SlotItem):
         Connect to the given socket_item.
 
         """
-        if self.maxConnections>0 and len(self.connected_slots) >= self.maxConnections:
+        if self.maxConnections > 0 and len(self.connected_slots) >= self.maxConnections:
             # Already connected.
-            self.connections[self.maxConnections-1]._remove()
+            self.connections[self.maxConnections - 1]._remove()
 
         # Populate connection.
         connection.socketItem = socket_item
@@ -1843,7 +1823,8 @@ class PlugItem(SlotItem):
 
         # Emit signal.
         nodzInst = self.scene().views()[0]
-        nodzInst.signal_PlugConnected.emit(connection.plugNode, connection.plugAttr, connection.socketNode, connection.socketAttr)
+        nodzInst.signal_PlugConnected.emit(connection.plugNode, connection.plugAttr, connection.socketNode,
+                                           connection.socketAttr)
 
     def disconnect(self, connection):
         """
@@ -1852,7 +1833,8 @@ class PlugItem(SlotItem):
         """
         # Emit signal.
         nodzInst = self.scene().views()[0]
-        nodzInst.signal_PlugDisconnected.emit(connection.plugNode, connection.plugAttr, connection.socketNode, connection.socketAttr)
+        nodzInst.signal_PlugDisconnected.emit(connection.plugNode, connection.plugAttr, connection.socketNode,
+                                              connection.socketAttr)
 
         # Remove connected socket from plug
         if connection.socketItem in self.connected_slots:
@@ -1862,7 +1844,6 @@ class PlugItem(SlotItem):
 
 
 class SocketItem(SlotItem):
-
     """
     A graphics item representing an attribute in hook.
 
@@ -1920,8 +1901,8 @@ class SocketItem(SlotItem):
 
         x = - width / 2.0
         y = (self.parentItem().baseHeight - config['node_radius'] +
-            (self.parentItem().attrHeight/4) +
-             self.parentItem().attrs.index(self.attribute) * self.parentItem().attrHeight )
+             (self.parentItem().attrHeight / 4) +
+             self.parentItem().attrs.index(self.attribute) * self.parentItem().attrHeight)
 
         rect = QtCore.QRectF(QtCore.QRect(x, y, width, height))
         return rect
@@ -1931,9 +1912,9 @@ class SocketItem(SlotItem):
         Connect to the given plug item.
 
         """
-        if self.maxConnections>0 and len(self.connected_slots) >= self.maxConnections:
+        if self.maxConnections > 0 and len(self.connected_slots) >= self.maxConnections:
             # Already connected.
-            self.connections[self.maxConnections-1]._remove()
+            self.connections[self.maxConnections - 1]._remove()
 
         # Populate connection.
         connection.plugItem = plug_item
@@ -1949,7 +1930,8 @@ class SocketItem(SlotItem):
 
         # Emit signal.
         nodzInst = self.scene().views()[0]
-        nodzInst.signal_SocketConnected.emit(connection.plugNode, connection.plugAttr, connection.socketNode, connection.socketAttr)
+        nodzInst.signal_SocketConnected.emit(connection.plugNode, connection.plugAttr, connection.socketNode,
+                                             connection.socketAttr)
 
     def disconnect(self, connection):
         """
@@ -1958,7 +1940,8 @@ class SocketItem(SlotItem):
         """
         # Emit signal.
         nodzInst = self.scene().views()[0]
-        nodzInst.signal_SocketDisconnected.emit(connection.plugNode, connection.plugAttr, connection.socketNode, connection.socketAttr)
+        nodzInst.signal_SocketDisconnected.emit(connection.plugNode, connection.plugAttr, connection.socketNode,
+                                                connection.socketAttr)
 
         # Remove connected plugs
         if connection.plugItem in self.connected_slots:
@@ -1968,7 +1951,6 @@ class SocketItem(SlotItem):
 
 
 class ConnectionItem(QtWidgets.QGraphicsPathItem):
-
     """
     A graphics path representing a connection between two attributes.
 
@@ -1993,8 +1975,8 @@ class ConnectionItem(QtWidgets.QGraphicsPathItem):
         """
         super(ConnectionItem, self).__init__()
 
-        # self.setZValue(1)
-        self.setZValue(3)
+        self.setZValue(1)
+        # self.setZValue(3)
 
         # Storage.
         self.socketNode = None
@@ -2024,9 +2006,9 @@ class ConnectionItem(QtWidgets.QGraphicsPathItem):
         """
         config = self.source.scene().views()[0].config
         self.setAcceptHoverEvents(True)
-        # self.setZValue(-1)
+        self.setZValue(-1)
 
-        self._pen = QtGui.QPen(utils._convertDataToColor(config['connection_color']))
+        self._pen = QtGui.QPen(utils._convertDataToColor(config["connection_color"]))
         self._pen.setWidth(config['connection_width'])
 
     def _outputConnectionData(self):
@@ -2044,9 +2026,9 @@ class ConnectionItem(QtWidgets.QGraphicsPathItem):
         """
         nodzInst = self.scene().views()[0]
 
-        # for item in nodzInst.scene().items():
-        #     if isinstance(item, ConnectionItem):
-        #         item.setZValue(0)
+        for item in nodzInst.scene().items():
+            if isinstance(item, ConnectionItem):
+                item.setZValue(0)
 
         nodzInst.drawingConnection = True
 
@@ -2157,11 +2139,13 @@ class ConnectionItem(QtWidgets.QGraphicsPathItem):
         scene.removeItem(self)
         scene.update()
 
-    def updatePath(self):
+    def updatePath(self, color="connection_color"):
         """
         Update the path.
 
         """
+        config = self.source.scene().views()[0].config
+        self._pen = QtGui.QPen(utils._convertDataToColor(config[color]))
         self.setPen(self._pen)
 
         path = QtGui.QPainterPath()

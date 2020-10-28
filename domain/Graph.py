@@ -23,7 +23,8 @@ class Graph(object):
         self.AllRoad = AllListGroup() #结果列表
         self.signal = 0 #标记位（总会有用的）
 
-
+    def setName(self, name):
+        self.name = name
 
 
     def setNodeList(self, nodeListOut: Optional[List[Node]]) -> bool:#添加新的结点

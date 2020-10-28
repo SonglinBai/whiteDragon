@@ -14,12 +14,12 @@
     "mouse_bounding_box": 80,
 
     // Shapes > Edit values BUT do not delete.
-    "node_width": 200,
+    "node_width": 100,
     "node_height": 25,
     "node_radius": 10,
     "node_border": 2,
     "node_attr_height": 30,
-    "connection_width": 4,
+    "connection_width": 3,
 
     // Default colors > Edit values BUT do not delete.
     "alternate_value": 20,
@@ -28,6 +28,7 @@
     "slot_border": [50, 50, 50, 255],
     "non_connectable_color": [100, 100, 100, 255],
     "connection_color": [255, 155, 0, 255],
+    "connection_att_color": [255, 30, 0, 255],
 
     "node_default": {
         "bg": [130, 130, 130, 255],
@@ -52,6 +53,12 @@
         "border": [50, 50, 50, 255],
         "border_sel": [170, 80, 80, 255],
         "text": [230, 230, 230, 255]
+    },
+    "node_preset_att": {
+        "bg": [255,30,0,255],
+        "border": [50,50,50,255],
+        "border_sel": [170, 80, 80, 255],
+        "text": [230,230,230,255]
     },
 
     "attr_preset_1": {
