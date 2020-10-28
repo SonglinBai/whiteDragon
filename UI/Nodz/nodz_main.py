@@ -1,5 +1,5 @@
 import os
-
+import platform
 from Qt import QtGui, QtCore, QtWidgets
 import UI.Nodz.nodz_utils as utils
 
@@ -108,10 +108,13 @@ class Nodz(QtWidgets.QGraphicsView):
         inFactor = 1.15
         outFactor = 1 / inFactor
 
-        delta1 = event.pixelDelta()
-        delta2 = event.angleDelta()
+        # 根据系统版本使用不同的delta值
+        if platform.system() == "Windows":
+            delta = event.angleDelta()
+        else:
+            delta = event.pixelDelta()
 
-        if event.pixelDelta().y() > 0 or event.pixelDelta().x() > 0:
+        if delta.y() > 0 or delta.x() > 0:
             zoomFactor = inFactor
         else:
             zoomFactor = outFactor
@@ -165,7 +168,7 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # Add selection
         elif (event.button() == QtCore.Qt.LeftButton and
-              QtCore.Qt.Key_Control in self.pressedKeys):
+              event.modifiers() == QtCore.Qt.ShiftModifier):
             self.currentState = 'ADD_SELECTION'
             self._initRubberband(event.pos())
             self.setInteractive(False)
@@ -173,7 +176,7 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # Subtract selection
         elif (event.button() == QtCore.Qt.LeftButton and
-              event.modifiers() == QtCore.Qt.ControlModifier):
+              event.modifiers() == QtCore.Qt.AltModifier):
             self.currentState = 'SUBTRACT_SELECTION'
             self._initRubberband(event.pos())
             self.setInteractive(False)
@@ -181,7 +184,7 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # Toggle selection
         elif (event.button() == QtCore.Qt.LeftButton and
-              event.modifiers() == QtCore.Qt.ShiftModifier):
+              event.modifiers() == QtCore.Qt.ControlModifier):
             self.currentState = 'TOGGLE_SELECTION'
             self._initRubberband(event.pos())
             self.setInteractive(False)

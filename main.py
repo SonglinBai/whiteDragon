@@ -54,6 +54,10 @@ def addNode():
 
 
 def loadGraph(graph: Graph,filePath):
+
+    """
+        从json文件中载入
+    """
     if os.path.exists(filePath):
         data = utils._loadData(filePath=filePath)
     else:
@@ -61,49 +65,8 @@ def loadGraph(graph: Graph,filePath):
         print('Load aborted !')
         return False
 
-    nodesData = data["NODES"]
-
-    nodes = []
-    graph.setName(data["NAME"])
-    mainWindow.itemListFrame.clear()
-    nodz.clearGraph()
-    for node in nodesData:
-        label = node['label']
-        position = node['position']
-        type = node['type']
-        port = node['port']
-        attempList = node['attemp']
-        position = QtCore.QPointF(position[0], position[1])
-
-        icon = 'Ui/icon/pc.png'
-        if type:
-            icon = 'UI/icon/server.png'
-
-        mainWindow.itemListFrame.addItem(QListWidgetItem(QIcon(icon),nodz.tr(label)))
-
-        nodeCreated = nodz.createNode(name=label, preset='node_preset_1', position=position, alternate=True)
-        list = []
-        for attemp in attempList:
-            list.append(Attemp(attemp['label'], attemp['vulneList'], attemp['requestPermission'],
-                               attemp['result'], attemp['prob']))
-        nodes.append(Node(label, type, port, list))
-
-        nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=int, plug=False, preset="attr_preset_3")
-        nodz.createAttribute(node=nodeCreated, name='out', index=1, dataType=int, socket=False, preset="attr_preset_3")
-
-    graph.setNodeList(nodes)
-
-    connectionData = data['CONNECTION']
-    graph.AttackTable = dict()
-
-    for source in connectionData.keys():
-        graph.AttackTable[graph.getNodeByLabel(source)] = []
-        for target in connectionData[source]:
-            graph.AttackTable[graph.getNodeByLabel(source)].append(graph.getNodeByLabel(target))
-            nodz.createConnection(source, 'out', target, 'in')
-
-    nodz.scene().update()
-    nodz.signal_GraphLoaded.emit()
+    mainWindow.loadGraph(data)
+    graph.loadGraph(data)
 
     return graph
 

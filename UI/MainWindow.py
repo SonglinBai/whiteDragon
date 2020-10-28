@@ -1,10 +1,12 @@
 import sys
 
+from domain.Graph import *
 from Qt.QtCore import Qt, QPointF
 from PyQt5.QtCore import QVariant
 from Qt.QtGui import QIcon, QCursor
 from Qt.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
-                          QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem, QAbstractItemView)
+                          QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem,
+                          QAbstractItemView)
 from UI.Nodz.nodz_main import Nodz
 from UI.QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
 from UI.QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
@@ -137,9 +139,47 @@ class MainWindow(QMainWindow):
         for node in self.nodz.scene().nodes.keys():
             self.nodz.scene().nodes[node].setSelected(False)
         # select node which name is item.text()
-
         for item in items:
             self.nodz.scene().nodes[item.text()].setSelected(True)
+
+    def loadGraph(self, data):
+        nodesData = data["NODES"]
+        # 清空节点列表,清空nodz图
+        self.itemListFrame.clear()
+        self.nodz.clearGraph()
+        # 遍历data中的节点
+        for node in nodesData:
+            label = node['label']
+            position = node['position']
+            type = node['type']
+            port = node['port']
+            attempList = node['attemp']
+            position = QPointF(position[0], position[1])
+
+            # 根据节点类型使用不同的图标
+            icon = 'UI/icon/pc.png'
+            if type:
+                icon = 'UI/icon/server.png'
+
+            # 在节点列表添加节点名
+            self.itemListFrame.addItem(QListWidgetItem(QIcon(icon), self.nodz.tr(label)))
+
+            # 在nodz中创建节点
+            nodeCreated = self.nodz.createNode(name=label, preset='node_preset_1', position=position, alternate=True)
+
+            self.nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=int, plug=False,
+                                      preset="attr_preset_3")
+            self.nodz.createAttribute(node=nodeCreated, name='out', index=1, dataType=int, socket=False,
+                                      preset="attr_preset_3")
+        # 创建nodz连接
+        connectionData = data['CONNECTION']
+        for source in connectionData.keys():
+            for target in connectionData[source]:
+                self.nodz.createConnection(source, 'out', target, 'in')
+
+        # 更新nodz,发出图加载信号
+        self.nodz.scene().update()
+        self.nodz.signal_GraphLoaded.emit()
 
 
 class NodeListWidget(QListWidget):
@@ -163,7 +203,6 @@ class NodeListWidget(QListWidget):
         # 菜单显示前，将它移动到鼠标点击的位置
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
-
 
 
 class ResultListWidget(QListWidget):
@@ -244,14 +283,12 @@ class PropertyBrowserWidget(QtTreePropertyBrowser):
         #     attempListItem.addSubProperty(item)
         topItem.addSubProperty(attempListItem)
 
-
-
-
         variantFactory = QtVariantEditorFactory(parent)
 
         self.setFactoryForManager(variantManager, variantFactory)
 
         self.addProperty(topItem)
+
 
 class AttackTemplateWidget(QListWidget):
     def __init__(self):
@@ -278,7 +315,6 @@ class AttackTemplateWidget(QListWidget):
 
     def showClickedItem(self, item: QListWidgetItem):
         print(item.text())
-
 
 
 if __name__ == "__main__":

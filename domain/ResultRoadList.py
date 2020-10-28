@@ -120,6 +120,10 @@ class AllListGroup(object):
         self.ListGroup.append(road)
         self.ListNumber = self.ListNumber + 1
 
+    def clear(self):
+        self.ListGroup.clear()
+        self.ListNumber = 0
+
 
 """
 testList = DoubleList()
