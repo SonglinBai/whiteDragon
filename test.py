@@ -83,15 +83,19 @@ class Graph(object):
                 return node
 
     def calculateAttackProb(self,startNode:Node):
+        self.AllRoad.ListGroup.clear()#重新置为零
+        self.AllRoad.ListNumber = 0
+        attackTabelCopy = copy.deepcopy(self.AttackTable)
         road = DoubleList()
         road.append([startNode, aAttempV0])
         self.CoreAlgorithm('%s'%startNode.label,road)
         for road in GraphA.AllRoad.ListGroup:
+            road.head.data[0] =  ("%.2f" % road.head.data[0])#小数位截断
             if road.head.data[0] == 1:
                 GraphA.AllRoad.ListGroup.remove(road)
-                GraphA.AllRoad.ListNumber -= 1
 
-
+        self.AttackTable = attackTabelCopy
+        self.AllRoad.ListNumber = len(self.AllRoad.ListGroup)
 
 
     def CoreAlgorithm(self, OutNodeLabel:str,road:DoubleList):  # 核心算法，用以计算所有路径的攻击概率
@@ -251,7 +255,6 @@ GraphA.AttackTable = {
     'nodeE':['nodeF'],
     'nodeF':[]
 }
-GraphA.calculateAttackProb(Anode)
 GraphA.calculateAttackProb(Anode)
 
 print(GraphA.AllRoad.ListNumber)
