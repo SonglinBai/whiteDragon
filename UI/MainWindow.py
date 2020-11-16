@@ -20,7 +20,7 @@ class MainWindow(QMainWindow):
 
     def initUI(self):
         # set window title and icon
-        self.setWindowTitle('WhiteDragon')
+        self.setWindowTitle(self.tr(u'WhiteDragon'))
         self.setWindowIcon(QIcon('icon/network.png'))
 
         # move main window to center of screen
@@ -58,11 +58,11 @@ class MainWindow(QMainWindow):
         menubar.addMenu(self.appMenu)
 
         # add actions to file menu
-        self.menuFile = QMenu(self.tr('File'))
-        self.actNewFile = QAction(self.tr('New'))
-        self.actOpenFile = QAction(self.tr('Open'))
-        self.actSave = QAction(self.tr('Save'))
-        self.actSaveAs = QAction(self.tr('Save as'))
+        self.menuFile = QMenu(self.tr(u'File'))
+        self.actNewFile = QAction(self.tr(u'New'))
+        self.actOpenFile = QAction(self.tr(u'Open'))
+        self.actSave = QAction(self.tr(u'Save'))
+        self.actSaveAs = QAction(self.tr(u'Save As'))
         self.actNewFile.setShortcut('Ctrl+N')
         self.actOpenFile.setShortcut('Ctrl+O')
         self.actSave.setShortcut('Ctrl+S')
@@ -75,12 +75,12 @@ class MainWindow(QMainWindow):
         menubar.addMenu(self.menuFile)
 
         # add actions to Edit menu
-        self.menuEdit = QMenu(self.tr('Edit'))
-        self.actUndo = QAction(self.tr('Undo'))
-        self.actRedo = QAction(self.tr('Redo'))
-        self.actCut = QAction(self.tr('Cut'))
-        self.actCopy = QAction(self.tr('Copy'))
-        self.actPaste = QAction(self.tr('Paste'))
+        self.menuEdit = QMenu(self.tr(u'Edit'))
+        self.actUndo = QAction(self.tr(u'Undo'))
+        self.actRedo = QAction(self.tr(u'Redo'))
+        self.actCut = QAction(self.tr(u'Cut'))
+        self.actCopy = QAction(self.tr(u'Copy'))
+        self.actPaste = QAction(self.tr(u'Paste'))
         self.actUndo.setShortcut('Ctrl+Z')
         self.actRedo.setShortcut('Ctrl+Y')
         self.actCut.setShortcut('Ctrl+X')
@@ -95,34 +95,41 @@ class MainWindow(QMainWindow):
         menubar.addMenu(self.menuEdit)
 
         # add actions to Run menu
-        self.menuRun = QMenu(self.tr('Run'))
-        self.actRun = QAction(self.tr('Run'))
+        self.menuRun = QMenu(self.tr(u'Analyse'))
+        self.actRun = QAction(self.tr(u'NetWork Analyse'))
+        self.actRunRisk = QAction(self.tr(u'High Risk Node'))
+        self.actRunImport = QAction(self.tr(u'Important Node'))
         self.actRun.setShortcut('Ctrl+R')
         self.menuRun.addAction(self.actRun)
+        self.menuRun.addSeparator()
+        self.menuRun.addAction(self.actRunRisk)
+        self.menuRun.addAction(self.actRunImport)
         menubar.addMenu(self.menuRun)
 
     def initLayout(self):
         self.mainWidget = QWidget()
         self.mainLayout = QHBoxLayout(self)
 
-        self.itemListFrame = NodeListWidget()
-        self.itemListFrame.setSelectionMode(QAbstractItemView.ExtendedSelection)
-        self.itemListFrame.setFrameShape(QFrame.StyledPanel)
+        self.nodeListFrame = NodeListWidget(self)
+        self.nodeListFrame.setSelectionMode(QAbstractItemView.ExtendedSelection)
+        self.nodeListFrame.setFrameShape(QFrame.StyledPanel)
 
         # connect single itemClicked to selectNode
-        self.itemListFrame.itemSelectionChanged.connect(self.selectNodes)
+        self.nodeListFrame.itemSelectionChanged.connect(self.selectNodes)
 
-        self.resultFrame = ResultListWidget()
+        self.resultFrame = ResultListWidget(self)
         self.resultFrame.setFrameShape(QFrame.StyledPanel)
 
-        self.nodz = Nodz(None)
+        self.attackTemplateWindow = AttackTemplateWindow(self)
+
+        self.nodz = Nodz(self)
         self.nodz.initialize()
 
         self.PropertiesFrame = PropertyBrowserWidget(self)
 
         self.mainWidget.setLayout(self.mainLayout)
         sp = QSplitter(Qt.Vertical)
-        sp.addWidget(self.itemListFrame)
+        sp.addWidget(self.nodeListFrame)
         sp.addWidget(self.resultFrame)
 
         splitter = QSplitter(Qt.Horizontal)
@@ -134,7 +141,7 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.mainWidget)
 
     def selectNodes(self):
-        items = self.itemListFrame.selectedItems()
+        items = self.nodeListFrame.selectedItems()
         # cancel all node selection
         for node in self.nodz.scene().nodes.keys():
             self.nodz.scene().nodes[node].setSelected(False)
@@ -142,49 +149,15 @@ class MainWindow(QMainWindow):
         for item in items:
             self.nodz.scene().nodes[item.text()].setSelected(True)
 
-    def loadGraph(self, data):
-        nodesData = data["NODES"]
+    def loadGraph(self, graph:Graph):
         # 清空节点列表,清空nodz图
-        self.itemListFrame.clear()
-        self.nodz.clearGraph()
-        # 遍历data中的节点
-        for node in nodesData:
-            label = node['label']
-            position = node['position']
-            type = node['type']
-            port = node['port']
-            attempList = node['attemp']
-            position = QPointF(position[0], position[1])
-
-            # 根据节点类型使用不同的图标
-            icon = 'UI/icon/pc.png'
-            if type:
-                icon = 'UI/icon/server.png'
-
-            # 在节点列表添加节点名
-            self.itemListFrame.addItem(QListWidgetItem(QIcon(icon), self.nodz.tr(label)))
-
-            # 在nodz中创建节点
-            nodeCreated = self.nodz.createNode(name=label, preset='node_preset_1', position=position, alternate=True)
-
-            self.nodz.createAttribute(node=nodeCreated, name='in', index=0, dataType=int, plug=False,
-                                      preset="attr_preset_3")
-            self.nodz.createAttribute(node=nodeCreated, name='out', index=1, dataType=int, socket=False,
-                                      preset="attr_preset_3")
-        # 创建nodz连接
-        connectionData = data['CONNECTION']
-        for source in connectionData.keys():
-            for target in connectionData[source]:
-                self.nodz.createConnection(source, 'out', target, 'in')
-
-        # 更新nodz,发出图加载信号
-        self.nodz.scene().update()
-        self.nodz.signal_GraphLoaded.emit()
+        self.nodeListFrame.update(graph)
+        self.nodz.loadGraph(graph)
 
 
 class NodeListWidget(QListWidget):
-    def __init__(self):
-        super(NodeListWidget, self).__init__()
+    def __init__(self,parent=None):
+        super(NodeListWidget, self).__init__(parent)
         self.createContextMenu()
 
     def createContextMenu(self):
@@ -193,8 +166,8 @@ class NodeListWidget(QListWidget):
 
         # 创建QMenu
         self.contextMenu = QMenu(self)
-        self.actionA = self.contextMenu.addAction(u'添加结点')
-        self.actionB = self.contextMenu.addAction(u'删除结点')
+        self.actionA = self.contextMenu.addAction(self.tr(u'Add Node'))
+        self.actionB = self.contextMenu.addAction(self.tr(u'Del Node'))
 
     def showContextMenu(self):
         '''''
@@ -204,10 +177,19 @@ class NodeListWidget(QListWidget):
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
 
+    def addNode(self, node:Node):
+        icon = ['UI/icon/pc.png','UI/icon/server.png']
+        self.addItem(QListWidgetItem(QIcon(icon[node.type]), node.label))
+
+    def update(self, graph:Graph):
+        self.clear()
+        for node in graph.ShowNodeList():
+            self.addNode(node)
+
 
 class ResultListWidget(QListWidget):
-    def __init__(self):
-        super(ResultListWidget, self).__init__()
+    def __init__(self, parent=None):
+        super(ResultListWidget, self).__init__(parent)
         self.createContextMenu()
         self.itemClicked.connect(self.showClickedItem)
 
@@ -217,8 +199,8 @@ class ResultListWidget(QListWidget):
 
         # 创建QMenu
         self.contextMenu = QMenu(self)
-        self.actionA = self.contextMenu.addAction(u'添加结点')
-        self.actionB = self.contextMenu.addAction(u'删除结点')
+        self.actionA = self.contextMenu.addAction(self.tr(u'Add Node'))
+        self.actionB = self.contextMenu.addAction(self.tr(u'Del Node'))
 
     def showContextMenu(self):
         '''''
@@ -233,16 +215,16 @@ class ResultListWidget(QListWidget):
 
 
 class PropertyBrowserWidget(QtTreePropertyBrowser):
-    def __init__(self, parent):
-        super(PropertyBrowserWidget, self).__init__()
+    def __init__(self, parent=None):
+        super(PropertyBrowserWidget, self).__init__(parent)
         self.initData(parent)
 
     def initData(self, parent):
         variantManager = QtVariantPropertyManager(parent)
 
-        topItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), "Node")
+        topItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), self.tr(u'Node'))
 
-        labelItem = variantManager.addProperty(QVariant.String, "label")
+        labelItem = variantManager.addProperty(QVariant.String, self.tr(u'Label'))
         topItem.addSubProperty(labelItem)
 
         # portItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(),"port")
@@ -250,7 +232,7 @@ class PropertyBrowserWidget(QtTreePropertyBrowser):
         """
             add type selection item 
         """
-        typeItem = variantManager.addProperty(QtVariantPropertyManager.enumTypeId(), "type")
+        typeItem = variantManager.addProperty(QtVariantPropertyManager.enumTypeId(), self.tr(u'Type'))
 
         enumNames = QList()
         enumNames.append("PC")
@@ -267,7 +249,7 @@ class PropertyBrowserWidget(QtTreePropertyBrowser):
         """
             add permission table
         """
-        permissionItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), "Permission Table")
+        permissionItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), self.tr(u'Permission'))
         # for i in range(10):
         #     item = variantManager.addProperty(QVariant.String, "test")
         #     item.setValue(i)
@@ -275,7 +257,7 @@ class PropertyBrowserWidget(QtTreePropertyBrowser):
         #     permissionItem.addSubProperty(item)
         topItem.addSubProperty(permissionItem)
 
-        attempListItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), "Attack Template")
+        attempListItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), self.tr(u'Attack Templates'))
         # for i in range(10):
         #     item = variantManager.addProperty(QVariant.String, "label")
         #     item.setValue("test"+str(i))
@@ -290,11 +272,13 @@ class PropertyBrowserWidget(QtTreePropertyBrowser):
         self.addProperty(topItem)
 
 
-class AttackTemplateWidget(QListWidget):
-    def __init__(self):
-        super(AttackTemplateWidget, self).__init__()
+class AttackTemplateWindow(QListWidget):
+    def __init__(self,parent=None):
+        super(AttackTemplateWindow, self).__init__(parent)
+        self.setWindowTitle(self.tr(u'Attack Templates'))
+        self.setWindowIcon(QIcon('icon/network.png'))
         self.createContextMenu()
-        self.itemClicked.connect(self.showClickedItem)
+        # self.itemClicked.connect(self.showClickedItem)
 
     def createContextMenu(self):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -302,8 +286,8 @@ class AttackTemplateWidget(QListWidget):
 
         # 创建QMenu
         self.contextMenu = QMenu(self)
-        self.actionA = self.contextMenu.addAction(u'添加结点')
-        self.actionB = self.contextMenu.addAction(u'删除结点')
+        self.actionA = self.contextMenu.addAction(self.tr(u'Add Template'))
+        self.actionB = self.contextMenu.addAction(self.tr(u'Del Template'))
 
     def showContextMenu(self):
         '''''
@@ -313,8 +297,8 @@ class AttackTemplateWidget(QListWidget):
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
 
-    def showClickedItem(self, item: QListWidgetItem):
-        print(item.text())
+    # def showClickedItem(self, item: QListWidgetItem):
+    #     print(item.text())
 
 
 if __name__ == "__main__":

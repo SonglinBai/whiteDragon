@@ -1,21 +1,16 @@
 import sys
 import os
-from UI.MainWindow import MainWindow
+from UI.MainWindow import MainWindow, AttackTemplateWindow
 from domain.Graph import *
 from Qt import QtCore
 from Qt.QtGui import QIcon
 from Qt.QtWidgets import (QApplication, QFileDialog, QListWidgetItem)
 import utils
 
-# 标记数字位
-alphabet = [chr(i) for i in range(65, 90)]
-alphabetNumber = 0
-
-# 标记结点位置，选则最后一个点击的结点
-lastPointNode = 0
-
 app = QApplication(sys.argv)
 app.setWindowIcon(QIcon("UI/icon/network.png"))
+translater = QtCore.QTranslator()
+translater = translater.load("")
 mainWindow = MainWindow()
 
 nodz = mainWindow.nodz
@@ -33,9 +28,6 @@ def saveGraph(graph: Graph, filePath):
     :param filePath: path you want to save
     """
     data = graph.toJson()
-    for node in data["NODES"]:
-        nodeInst = nodz.scene().nodes[node["label"]]
-        node["position"] = [nodeInst.pos().x(), nodeInst.pos().y()]
     try:
         utils._saveData(path=filePath, data=data)
     except:
@@ -44,13 +36,6 @@ def saveGraph(graph: Graph, filePath):
         return False
 
 
-def addNode():
-    global alphabetNumber
-    locateLetter = alphabet[alphabetNumber]
-
-    node = nodz.createNode(name='node%s' % locateLetter, preset='node_preset_1', position=None)
-
-    alphabetNumber = alphabetNumber + 1
 
 
 def loadGraph(graph: Graph,filePath):
@@ -65,10 +50,8 @@ def loadGraph(graph: Graph,filePath):
         print('Load aborted !')
         return False
 
-    mainWindow.loadGraph(data)
     graph.loadGraph(data)
-
-    return graph
+    mainWindow.loadGraph(graph)
 
 def CaculateGraph(graph):
     road = DoubleList()
@@ -83,23 +66,23 @@ def updateResult(result: List):
         mainWindow.resultFrame.addItem(road.travel())
 
 
-def DeleteNode():
-    nodz.deleteNode(lastPointNode)
-
-
-nodz.signal_AddNode.connect(addNode)
-nodz.signal_DeleteNode.connect(DeleteNode)
-
-
 # Nodes
 @QtCore.Slot(str)
 def on_nodeCreated(nodeName):
     print('node created : ', nodeName)
-
+    """
+    1. 更新Graph
+    2. 更新nodeListFrame
+    """
+    node = Node(nodeName,0,[0,0],[],[])
+    graph.addNode(node)
+    mainWindow.nodeListFrame.addNode(node)
 
 @QtCore.Slot(str)
 def on_nodeDeleted(nodeName):
     print('node deleted : ', nodeName)
+    graph.delNodes(nodeName)
+    mainWindow.nodeListFrame.update(graph)
 
 
 @QtCore.Slot(str, str)
@@ -109,10 +92,7 @@ def on_nodeEdited(nodeName, newName):
 
 @QtCore.Slot(str)
 def on_nodeSelected(node):
-    global lastPointNode
-    for i in node:
-        print(i.name)
-        lastPointNode = i
+    print(node)
 
 
 #  print('node selected : ', node)
@@ -122,10 +102,13 @@ def on_nodeSelected(node):
 def on_nodeMoved(nodeName, nodePos):
     print('node {0} moved to {1}'.format(nodeName, nodePos))
 
+    graph.move(nodeName, [nodePos.x(),nodePos.y()])
+
 
 @QtCore.Slot(str)
 def on_nodeDoubleClick(nodeName):
     print('double click on node : {0}'.format(nodeName))
+    mainWindow.attackTemplateWindow.show()
 
 
 # Attrs
@@ -217,6 +200,7 @@ mainWindow.actSaveAs.triggered.connect(on_actSaveAsTriggered)
 mainWindow.actSave.triggered.connect(on_actSaveTriggered)
 mainWindow.actOpenFile.triggered.connect(on_actOpenTriggered)
 
+nodz.signal_NodeCreated.connect(on_nodeCreated)
 nodz.signal_NodeDeleted.connect(on_nodeDeleted)
 nodz.signal_NodeEdited.connect(on_nodeEdited)
 nodz.signal_NodeSelected.connect(on_nodeSelected)
@@ -256,7 +240,7 @@ nodz.signal_KeyPressed.connect(on_keyPressed)
 # Cnode = Node('nodeC',0,[2222],[cAttempV0,cAttempV1,cAttempV2])
 # Dnode = Node('nodeD',1,[2231],[dAttempV0])
 # Enode = Node('nodeE',1,[3112],[eAttempV0])
-# Fnode = Node('nodeF',2,[4445],[fAttempV0])
+# Fnode = Node('nodeF',1,[4445],[fAttempV0])
 # GraphA.setNodeList([Anode,Bnode,Cnode,Dnode,Enode,Fnode])
 #
 # #建立邻接多重表

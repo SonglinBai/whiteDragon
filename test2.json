@@ -130,7 +130,7 @@
         },
         {
             "label": "nodeF",
-            "type": 2,
+            "type": 1,
             "port": [
                 4445
             ],

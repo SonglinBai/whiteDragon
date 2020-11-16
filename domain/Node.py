@@ -4,9 +4,10 @@ from domain.permission import *
 
 from domain.Attemp import *
 class Node(object):
-    def __init__(self,label: str,type:int,port:list,Attemp:List[Attemp]):#
+    def __init__(self,label: str,type:int, position:List,port:list,Attemp:List[Attemp]):#
         self.label = label#编号
         self.type = type #0-主机 1-服务器
+        self.position = position
         self.port = port#开放端口
         self.Attemp = Attemp#攻击模版
         self.permission = permission({},[],[]) #权限表 权限表默认创建时为空
@@ -16,6 +17,7 @@ class Node(object):
         data = {
             "label": self.label,
             "type": self.type,
+            "position": self.position,
             "port": self.port,
             "attemp": [],
         }

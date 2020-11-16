@@ -2,6 +2,7 @@ import os
 import platform
 from Qt import QtGui, QtCore, QtWidgets
 import UI.Nodz.nodz_utils as utils
+from domain.Graph import *
 
 defaultConfigPath = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'default_config.json')
 
@@ -14,9 +15,6 @@ class Nodz(QtWidgets.QGraphicsView):
     different user interactions.
 
     """
-    signal_AddNode = QtCore.Signal(int)
-    signal_DeleteNode = QtCore.Signal(int)
-
     signal_NodeCreated = QtCore.Signal(object)
     signal_NodeDeleted = QtCore.Signal(object)
     signal_NodeEdited = QtCore.Signal(object, object)
@@ -55,7 +53,7 @@ class Nodz(QtWidgets.QGraphicsView):
         self.gridVisToggle = True
         self.gridSnapToggle = False
         self._nodeSnap = False
-        self.selectedNodes = None
+        # self.selectedNodes = None
 
         # Connections data.
         self.drawingConnection = False
@@ -73,29 +71,94 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # 创建QMenu
         self.contextMenu = QtWidgets.QMenu(self)
-        self.actionA = self.contextMenu.addAction(u'添加结点')
-        self.actionB = self.contextMenu.addAction(u'删除结点')
-        # 将动作与处理函数相关联
-        # 这里为了简单，将所有action与同一个处理函数相关联，
-        # 当然也可以将他们分别与不同函数关联，实现不同的功能
-        self.actionA.triggered.connect(self.addNodeHandler)
-        self.actionB.triggered.connect(self.DeleteNodeHandler)
+        self.actionAddNode = self.contextMenu.addAction(self.tr(u'Add Node'))
+        self.actionDelNode = self.contextMenu.addAction(self.tr(u'Del Node'))
+        self.actionAddNode.triggered.connect(self.addNodeHandler)
+        self.actionDelNode.triggered.connect(self.deleteNodeHandler)
 
     def showContextMenu(self, pos):
         '''''
         右键点击时调用的函数
         '''
         # 菜单显示前，将它移动到鼠标点击的位置
+        print(self.itemAt(pos))
         self.contextMenu.move(QtGui.QCursor().pos())
         self.contextMenu.show()
 
     def addNodeHandler(self):
-        print('addNode')
-        self.signal_AddNode.emit(1)
+        nodeCreated = self.createNode(self.getDefaultNodeLabel(), preset='node_preset_1', alternate=True)
+        self.createAttribute(node=nodeCreated, name='in', index=0, dataType=int, plug=False,
+                                  preset="attr_preset_3")
+        self.createAttribute(node=nodeCreated, name='out', index=1, dataType=int, socket=False,
+                                  preset="attr_preset_3")
 
-    def DeleteNodeHandler(self):
-        print('deleteNode')
-        self.signal_DeleteNode.emit(2)
+    def deleteNodeHandler(self):
+        for node in self.selectedNodes():
+            self.deleteNode(node)
+
+    def getDefaultNodeLabel(self):
+        i = 1
+        allLabel = []
+        for item in self.scene().items():
+            if isinstance(item,NodeItem):
+                allLabel.append(item.name)
+        while(i<100):
+            defaultLabel = 'Node' + str(i)
+            i += 1
+            if defaultLabel not in allLabel:
+                return defaultLabel
+
+    def selectedNodes(self):
+        nodes = []
+        items = self.scene().selectedItems()
+        for item in items:
+            if isinstance(item, NodeItem):
+                nodes.append(item)
+        return nodes
+
+    def allNodes(self):
+        nodes = []
+        for item in self.scene().items():
+            if isinstance(item, NodeItem):
+                nodes.append(item)
+        return nodes
+
+    def loadGraph(self, graph:Graph):
+        self.clearGraph()
+        for node in graph.ShowNodeList():
+            position = QtCore.QPointF(node.position[0],node.position[1])
+
+            name = node.label
+            if name in self.scene().nodes.keys():
+                print('A node with the same name already exists : {0}'.format(name))
+                print('Node creation aborted !')
+                return
+            else:
+                nodeItem = NodeItem(name=name, alternate=True, preset='node_preset_1',
+                                    config=self.config)
+
+                # Store node in scene.
+                self.scene().nodes[name] = nodeItem
+
+                if not position:
+                    # Get the center of the view.
+                    position = self.mapToScene(self.viewport().rect().center())
+
+                # Set node position.
+                self.scene().addItem(nodeItem)
+                nodeItem.setPos(position - nodeItem.nodeCenter)
+
+                self.createAttribute(nodeItem,name='in',preset='attr_preset_3',dataType=str)
+                self.createAttribute(nodeItem,name='out',preset='attr_preset_3',dataType=str)
+
+        connection = graph.AttackTable
+        for source in connection.keys():
+            for target in connection[source]:
+                self.createConnection(source.label, 'out', target.label, 'in')
+        self.scene().update()
+        self.signal_GraphLoaded.emit()
+
+
 
     def wheelEvent(self, event):
         """
@@ -128,23 +191,21 @@ class Nodz(QtWidgets.QGraphicsView):
 
         """
         # Tablet zoom
-        if event.button() == QtCore.Qt.RightButton:
-            print('right')
-            self.currentState = 'ZOOM_VIEW'
-            self.initMousePos = event.pos()
-            # self.zoomInitialPos = event.pos()
-            self.initMouse = QtGui.QCursor.pos()
-            self.setInteractive(False)
+        # if event.button() == QtCore.Qt.RightButton:
+        #     self.currentState = 'ZOOM_VIEW'
+        #     self.initMousePos = event.pos()
+        #     # self.zoomInitialPos = event.pos()
+        #     self.initMouse = QtGui.QCursor.pos()
+        #     self.setInteractive(False)
 
 
 
         # Drag view
-        elif (event.button() == QtCore.Qt.MiddleButton):
+        if (event.button() == QtCore.Qt.MiddleButton):
             self.currentState = 'DRAG_VIEW'
             self.prevPos = event.pos()
             self.setCursor(QtCore.Qt.ClosedHandCursor)
             self.setInteractive(False)
-            print('mide')
 
 
         # Rubber band selection
@@ -154,7 +215,6 @@ class Nodz(QtWidgets.QGraphicsView):
             self.currentState = 'SELECTION'
             self._initRubberband(event.pos())
             self.setInteractive(False)
-            print('left')
 
 
         # Drag Item
@@ -163,7 +223,6 @@ class Nodz(QtWidgets.QGraphicsView):
               self.scene().itemAt(self.mapToScene(event.pos()), QtGui.QTransform()) is not None):
             self.currentState = 'DRAG_ITEM'
             self.setInteractive(True)
-            print('else')
 
 
         # Add selection
@@ -848,85 +907,85 @@ class Nodz(QtWidgets.QGraphicsView):
         # Emit signal.
         self.signal_GraphSaved.emit()
 
-    def loadGraph(self, filePath='path'):
-        """
-        Get all the stored info from the .json file at the given location
-        and recreate the graph as saved.
-
-        :type  filePath: str.
-        :param filePath: The path where you want to load your graph from.
-
-        """
-        # Load data.
-        if os.path.exists(filePath):
-            data = utils._loadData(filePath=filePath)
-        else:
-            print('Invalid path : {0}'.format(filePath))
-            print('Load aborted !')
-            return False
-
-        # Apply nodes data.
-        nodesData = data['NODES']
-        nodesName = nodesData.keys()
-
-        for name in nodesName:
-            preset = nodesData[name]['preset']
-            position = nodesData[name]['position']
-            position = QtCore.QPointF(position[0], position[1])
-            alternate = nodesData[name]['alternate']
-
-            node = self.createNode(name=name,
-                                   preset=preset,
-                                   position=position,
-                                   alternate=alternate)
-
-            # Apply attributes data.
-            attrsData = nodesData[name]['attributes']
-
-            for attrData in attrsData:
-                index = attrsData.index(attrData)
-                name = attrData['name']
-                plug = attrData['plug']
-                socket = attrData['socket']
-                preset = attrData['preset']
-                dataType = attrData['dataType']
-                plugMaxConnections = attrData['plugMaxConnections']
-                socketMaxConnections = attrData['socketMaxConnections']
-
-                # un-serialize data type if needed
-                if (isinstance(dataType, str) and dataType.find('<') == 0):
-                    dataType = eval(str(dataType.split('\'')[1]))
-
-                self.createAttribute(node=node,
-                                     name=name,
-                                     index=index,
-                                     preset=preset,
-                                     plug=plug,
-                                     socket=socket,
-                                     dataType=dataType,
-                                     plugMaxConnections=plugMaxConnections,
-                                     socketMaxConnections=socketMaxConnections
-                                     )
-
-        # Apply connections data.
-        connectionsData = data['CONNECTIONS']
-
-        for connection in connectionsData:
-            source = connection[0]
-            sourceNode = source.split('.')[0]
-            sourceAttr = source.split('.')[1]
-
-            target = connection[1]
-            targetNode = target.split('.')[0]
-            targetAttr = target.split('.')[1]
-
-            self.createConnection(sourceNode, sourceAttr,
-                                  targetNode, targetAttr)
-
-        self.scene().update()
-
-        # Emit signal.
-        self.signal_GraphLoaded.emit()
+    # def loadGraph(self, filePath='path'):
+    #     """
+    #     Get all the stored info from the .json file at the given location
+    #     and recreate the graph as saved.
+    #
+    #     :type  filePath: str.
+    #     :param filePath: The path where you want to load your graph from.
+    #
+    #     """
+    #     # Load data.
+    #     if os.path.exists(filePath):
+    #         data = utils._loadData(filePath=filePath)
+    #     else:
+    #         print('Invalid path : {0}'.format(filePath))
+    #         print('Load aborted !')
+    #         return False
+    #
+    #     # Apply nodes data.
+    #     nodesData = data['NODES']
+    #     nodesName = nodesData.keys()
+    #
+    #     for name in nodesName:
+    #         preset = nodesData[name]['preset']
+    #         position = nodesData[name]['position']
+    #         position = QtCore.QPointF(position[0], position[1])
+    #         alternate = nodesData[name]['alternate']
+    #
+    #         node = self.createNode(name=name,
+    #                                preset=preset,
+    #                                position=position,
+    #                                alternate=alternate)
+    #
+    #         # Apply attributes data.
+    #         attrsData = nodesData[name]['attributes']
+    #
+    #         for attrData in attrsData:
+    #             index = attrsData.index(attrData)
+    #             name = attrData['name']
+    #             plug = attrData['plug']
+    #             socket = attrData['socket']
+    #             preset = attrData['preset']
+    #             dataType = attrData['dataType']
+    #             plugMaxConnections = attrData['plugMaxConnections']
+    #             socketMaxConnections = attrData['socketMaxConnections']
+    #
+    #             # un-serialize data type if needed
+    #             if (isinstance(dataType, str) and dataType.find('<') == 0):
+    #                 dataType = eval(str(dataType.split('\'')[1]))
+    #
+    #             self.createAttribute(node=node,
+    #                                  name=name,
+    #                                  index=index,
+    #                                  preset=preset,
+    #                                  plug=plug,
+    #                                  socket=socket,
+    #                                  dataType=dataType,
+    #                                  plugMaxConnections=plugMaxConnections,
+    #                                  socketMaxConnections=socketMaxConnections
+    #                                  )
+    #
+    #     # Apply connections data.
+    #     connectionsData = data['CONNECTIONS']
+    #
+    #     for connection in connectionsData:
+    #         source = connection[0]
+    #         sourceNode = source.split('.')[0]
+    #         sourceAttr = source.split('.')[1]
+    #
+    #         target = connection[1]
+    #         targetNode = target.split('.')[0]
+    #         targetAttr = target.split('.')[1]
+    #
+    #         self.createConnection(sourceNode, sourceAttr,
+    #                               targetNode, targetAttr)
+    #
+    #     self.scene().update()
+    #
+    #     # Emit signal.
+    #     self.signal_GraphLoaded.emit()
 
     def createConnection(self, sourceNode, sourceAttr, targetNode, targetAttr):
         """
@@ -1136,8 +1195,6 @@ class NodeItem(QtWidgets.QGraphicsItem):
 
         # Methods.
         self._createStyle(config)
-        # trst
-        # self.createContextMenu()
 
     # test
     @property

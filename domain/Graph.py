@@ -37,6 +37,29 @@ class Graph(object):
 
         return True
 
+    def addNode(self, node:Node):
+        if not self.getNodeByLabel(node.label):
+            self.__nodeList.append(node)
+        else:
+            print("Can't add Node: Node"+node.label+"exist already")
+
+    def delNodes(self, labels:List):
+        for label in labels:
+            self.delNode(label)
+
+    def delNode(self, label:str):
+        node = self.getNodeByLabel(label)
+        if node is not None:
+            self.__nodeList.remove(node)
+        else:
+            print("Can't del Node: Node"+label+"don't exist")
+            return
+
+    def move(self, node:str, positon:List):
+        node = self.getNodeByLabel(node)
+
+        node.position = positon
+
     def getNodeByLabel(self, label):
         for node in self.__nodeList:
             if node.label == label:
@@ -56,7 +79,6 @@ class Graph(object):
             return False
 
     def ShowNodeList(self):  # 返回结点的列表
-
         return copy.deepcopy(self.__nodeList)
 
     def ShowVexList(self):
@@ -180,13 +202,14 @@ class Graph(object):
             type = node['type']
             port = node['port']
             attemp = node['attemp']
+            position = node['position']
 
             attempList = []
             # 遍历攻击模板
             for a in attemp:
                 attempList.append(Attemp(a['label'], a['vulneList'], a['requestPermission'],
                                          a['result'], a['prob']))
-            nodes.append(Node(label, type, port, attempList))
+            nodes.append(Node(label, type, position, port, attempList))
 
         self.setNodeList(nodes)
 
