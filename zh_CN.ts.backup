@@ -116,19 +116,6 @@
     </message>
 </context>
 <context>
-    <name>Nodz</name>
-    <message>
-        <location filename="UI/Nodz/nodz_main.py" line="74"/>
-        <source>Add Node</source>
-        <translation>添加节点</translation>
-    </message>
-    <message>
-        <location filename="UI/Nodz/nodz_main.py" line="75"/>
-        <source>Del Node</source>
-        <translation>删除节点</translation>
-    </message>
-</context>
-<context>
     <name>PropertyBrowserWidget</name>
     <message>
         <location filename="UI/MainWindow.py" line="225"/>
@@ -172,17 +159,17 @@
 <context>
     <name>mainWindow</name>
     <message>
-        <location filename="main.py" line="180"/>
+        <location filename="main.py" line="179"/>
         <source>Save</source>
         <translation>保存</translation>
     </message>
     <message>
-        <location filename="main.py" line="189"/>
+        <location filename="main.py" line="188"/>
         <source>Json files (*.json)</source>
         <translation>Json files (*.json)</translation>
     </message>
     <message>
-        <location filename="main.py" line="189"/>
+        <location filename="main.py" line="188"/>
         <source>Open</source>
         <translation>打开</translation>
     </message>

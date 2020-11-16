@@ -9,8 +9,9 @@ import utils
 
 app = QApplication(sys.argv)
 app.setWindowIcon(QIcon("UI/icon/network.png"))
-translater = QtCore.QTranslator()
-translater = translater.load("")
+translator = QtCore.QTranslator()
+translator.load("./zh_CN.qm")
+app.installTranslator(translator)
 mainWindow = MainWindow()
 
 nodz = mainWindow.nodz
@@ -34,8 +35,6 @@ def saveGraph(graph: Graph, filePath):
         print('Invalid path : {0}'.format(filePath))
         print('Save aborted !')
         return False
-
-
 
 
 def loadGraph(graph: Graph,filePath):
