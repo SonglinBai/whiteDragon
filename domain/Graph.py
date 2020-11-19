@@ -192,6 +192,12 @@ class Graph(object):
 
         return True
 
+    def calDragonNode(self):
+        for node in self.__nodeList:
+            for road in self.AllRoad.ListGroup:
+                road.calculateNodeProb(node.label)
+
+
     def toJson(self):
         connection = dict()
         for cn in self.AttackTable.keys():
