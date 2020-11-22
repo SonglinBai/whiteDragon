@@ -1,6 +1,6 @@
 import sys
 import os
-from UI.MainWindow import MainWindow, AttackTemplateWindow
+from UI.MainWindow import MainWindow
 from domain.Graph import *
 from Qt import QtCore
 from Qt.QtGui import QIcon
