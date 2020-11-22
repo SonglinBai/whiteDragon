@@ -155,42 +155,42 @@ class AllListGroup(object):
 
 
 
-testList = DoubleList()
-
-bAttempV0 = Attemp('B(v0)', ['CVE-1'], 1, 1, 0.5)
-bAttempV1 = Attemp('B(v1)', ['CVE-2'], 0, 1, 0.2)
-cAttempV0 = Attemp('C(v0)', ['CVE-3'], 0, 1, 0.1)
-cAttempV1 = Attemp('C(v1)', ['CVE-4'], 1, 2, 0.3)
-cAttempV2 = Attemp('C(v2)', ['CVE-5'], 2, 3, 0.7)
-dAttempV0 = Attemp('D(v0)', ['CVE-6'], 0, 0, 0.4)
-eAttempV0 = Attemp('E(v0)', ['CVE-7'], 0, 0, 0.2)
-fAttempV0 = Attemp('F(v0)', ['CVE-8'], 0, 0, 0.9)
-
-#建立点：
-Anode = Node('nodeA',0,[],[8086],[])
-Bnode = Node('nodeB',1,[],[1123],[bAttempV0,bAttempV1])
-Cnode = Node('nodeC',0,[],[2222],[cAttempV0,cAttempV1,cAttempV2])
-Dnode = Node('nodeD',1,[],[2231],[dAttempV0])
-Enode = Node('nodeE',1,[],[3112],[eAttempV0])
-Fnode = Node('nodeF',2,[],[4445],[fAttempV0])
-
-testList.append(['nodeC',cAttempV0])
-testList.append(['nodeC',cAttempV1])
-testList.append(['nodeC',cAttempV2])
-testList.append(['nodeE',eAttempV0])
-testList.append(['nodeF',fAttempV0])
-m = testList.findNodeAttmp('nodeC')
-allList = AllListGroup()
-blacklist = DoubleList()
-testList.travel()
-print(testList.head.data[0])
-print(testList.calculateNodeProb('nodeE'))
-
-
-
-
-
-c = testList.findBlock(fAttempV0)
+# testList = DoubleList()
+#
+# bAttempV0 = Attemp('B(v0)', ['CVE-1'], 1, 1, 0.5)
+# bAttempV1 = Attemp('B(v1)', ['CVE-2'], 0, 1, 0.2)
+# cAttempV0 = Attemp('C(v0)', ['CVE-3'], 0, 1, 0.1)
+# cAttempV1 = Attemp('C(v1)', ['CVE-4'], 1, 2, 0.3)
+# cAttempV2 = Attemp('C(v2)', ['CVE-5'], 2, 3, 0.7)
+# dAttempV0 = Attemp('D(v0)', ['CVE-6'], 0, 0, 0.4)
+# eAttempV0 = Attemp('E(v0)', ['CVE-7'], 0, 0, 0.2)
+# fAttempV0 = Attemp('F(v0)', ['CVE-8'], 0, 0, 0.9)
+#
+# #建立点：
+# Anode = Node('nodeA',0,[],[8086],[])
+# Bnode = Node('nodeB',1,[],[1123],[bAttempV0,bAttempV1])
+# Cnode = Node('nodeC',0,[],[2222],[cAttempV0,cAttempV1,cAttempV2])
+# Dnode = Node('nodeD',1,[],[2231],[dAttempV0])
+# Enode = Node('nodeE',1,[],[3112],[eAttempV0])
+# Fnode = Node('nodeF',2,[],[4445],[fAttempV0])
+#
+# testList.append(['nodeC',cAttempV0])
+# testList.append(['nodeC',cAttempV1])
+# testList.append(['nodeC',cAttempV2])
+# testList.append(['nodeE',eAttempV0])
+# testList.append(['nodeF',fAttempV0])
+# m = testList.findNodeAttmp('nodeC')
+# allList = AllListGroup()
+# blacklist = DoubleList()
+# testList.travel()
+# print(testList.head.data[0])
+# print(testList.calculateNodeProb('nodeE'))
+#
+#
+#
+#
+#
+# c = testList.findBlock(fAttempV0)
 
 
 
