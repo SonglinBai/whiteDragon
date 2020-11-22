@@ -154,7 +154,7 @@ class Nodz(QtWidgets.QGraphicsView):
         connection = graph.AttackTable
         for source in connection.keys():
             for target in connection[source]:
-                self.createConnection(source.label, 'out', target.label, 'in')
+                self.createConnection(source, 'out', target, 'in')
         self.scene().update()
         self.signal_GraphLoaded.emit()
 

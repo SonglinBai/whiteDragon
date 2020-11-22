@@ -53,10 +53,7 @@ def loadGraph(graph: Graph,filePath):
     mainWindow.loadGraph(graph)
 
 def CaculateGraph(graph):
-    road = DoubleList()
-    aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1.00)
-    road.append([graph.getNodeByLabel('nodeA'),aAttempV0])
-    graph.CoreAlgorithm(graph.getNodeByLabel('nodeA'), road)
+    graph.calculateAttackProb(graph.getNodeByLabel('nodeA'))
     updateResult(graph.AllRoad.ListGroup)
 
 def updateResult(result: List):
