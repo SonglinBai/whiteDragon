@@ -4,7 +4,7 @@ from domain.permission import *
 
 from domain.Attemp import *
 class Node(object):
-    def __init__(self,label: str,type:int, position:List,port:list,Attemp:List[Attemp]):#
+    def __init__(self,label: str,type:int, position:List,port:list,Attemp:List[str]):#
         self.label = label#编号
         self.type = type #0-主机 1-服务器
         self.position = position
