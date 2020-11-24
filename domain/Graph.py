@@ -20,6 +20,7 @@ class Graph(object):
         self.__nodeNum: int = 0  # 结点的计数
         self.AttackTable = {}  # 攻击路径的邻接表
         self.AllRoad = AllListGroup()  # 结果列表
+        self.attempList = []
         self.signal = 0  # 标记位（总会有用的）
 
     def setName(self, name):
@@ -127,6 +128,10 @@ class Graph(object):
             return True
         else:
             return False
+    def getAttempByLabel(self,attempLabel:str):
+        for attemp in self.attempList:
+            if attemp.label == attempLabel:
+                return attemp
 
     def CoreAlgorithm(self, OutNodeLabel: str, road: DoubleList):  # 核心算法，用以计算所有路径的攻击概率
         #   print(OutNode.label)
@@ -170,8 +175,9 @@ class Graph(object):
                 if OutNode.permission.AttackedRoadList != []:
                     self.signal = 1  # 发生回朔
                     # self.AttackTable[OutNode] = copy.deepcopy(OutNode.permission.AttackRoadList)  # 这条代码会改变原本结点的地址
-                    list = copy.deepcopy(OutNode.permission.AttackRoadList)
-                    self.AttackTable[OutNode] = list
+                    list1 = copy.deepcopy(OutNode.permission.AttackRoadList)
+                    list_unquie = list(set(list1))
+                    self.AttackTable[OutNodeLabel] = list_unquie
                     AnotherNodeLabel = OutNode.permission.AttackedRoadList.pop()
                     self.CoreAlgorithm(AnotherNodeLabel, road)
                 else:
@@ -186,7 +192,9 @@ class Graph(object):
         signal = 1
         # 这里存在一个跳权限的问题 及 如果 新加入的权限为2 权限为1 的点造成的影响会直接跳过
         AttackPerLevel = AttackNode.permission.permissionTable['%s' % (AttackedNode.label)]  # 得到攻击结点拥有的权限
-        for AttempRoad in AttackedNode.Attemp:  # 遍历
+        for attemp in AttackedNode.Attemp:  # 遍历
+            AttempRoad = self.getAttempByLabel(attemp)
+            #print(AttempRoad)
             if AttempRoad.requestPermission == AttackPerLevel:
                 if RoadList.findBlock(AttempRoad) != False:
                     return False
@@ -202,9 +210,20 @@ class Graph(object):
         return True
 
     def calDragonNode(self):
+        listLabel = [1]
+        i = 0
         for node in self.__nodeList:
+            listLabel.append(1)
+            i += 1
             for road in self.AllRoad.ListGroup:
-                road.calculateNodeProb(node.label)
+                m = road.calculateNodeProb(node.label)
+                #print(m)
+                if m != None:
+                    listLabel[i] = listLabel[i] + m
+
+        return listLabel
+
+
 
 
     def toJson(self):
@@ -260,7 +279,6 @@ class Graph(object):
             for target in connectionData[source]:
                 self.AttackTable[source].append(target)
 
-#
 # #以下为测试数据
 # GraphA = Graph('GraphA')
 # #建立攻击模版
@@ -274,13 +292,15 @@ class Graph(object):
 # eAttempV0 = Attemp('E(v0)', ['CVE-7'], 0, 0, 0.2)
 # fAttempV0 = Attemp('F(v0)', ['CVE-8'], 0, 0, 0.9)
 #
+# GraphA.attempList = [aAttempV0,bAttempV0,bAttempV1,cAttempV0,cAttempV1,cAttempV2,dAttempV0,eAttempV0,fAttempV0]
+#
 # #建立点：
 # Anode = Node('nodeA',0,[],[8086],[])
-# Bnode = Node('nodeB',1,[],[1123],[bAttempV0,bAttempV1])
-# Cnode = Node('nodeC',0,[],[2222],[cAttempV0,cAttempV1,cAttempV2])
-# Dnode = Node('nodeD',1,[],[2231],[dAttempV0])
-# Enode = Node('nodeE',1,[],[3112],[eAttempV0])
-# Fnode = Node('nodeF',2,[],[4445],[fAttempV0])
+# Bnode = Node('nodeB',1,[],[1123],['B(v0)','B(v1)'])
+# Cnode = Node('nodeC',0,[],[2222],['C(v0)','C(v1)','C(v2)'])
+# Dnode = Node('nodeD',1,[],[2231],['D(v0)'])
+# Enode = Node('nodeE',1,[],[3112],['E(v0)'])
+# Fnode = Node('nodeF',2,[],[4445],['F(v0)'])
 # GraphA.setNodeList([Anode,Bnode,Cnode,Dnode,Enode,Fnode])
 #
 # #建立邻接多重表
@@ -298,3 +318,7 @@ class Graph(object):
 # for i in GraphA.AllRoad.ListGroup:
 #     i.travel()
 #     print(i.head.data[0])
+#
+# listLabel = GraphA.calDragonNode()
+# for i in listLabel:
+#     print(i)
