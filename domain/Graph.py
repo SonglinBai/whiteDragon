@@ -201,9 +201,20 @@ class Graph(object):
         return True
 
     def calDragonNode(self):
+        listLabel = [1]
+        i = 0
         for node in self.__nodeList:
+            listLabel.append(1)
+            i += 1
             for road in self.AllRoad.ListGroup:
-                road.calculateNodeProb(node.label)
+                m = road.calculateNodeProb(node.label)
+                #print(m)
+                if m != None:
+                    listLabel[i] = listLabel[i] + m
+
+        return listLabel
+
+
 
 
     def toJson(self):
@@ -299,3 +310,7 @@ print(GraphA.AllRoad.ListNumber)
 for i in GraphA.AllRoad.ListGroup:
     i.travel()
     print(i.head.data[0])
+
+listLabel = GraphA.calDragonNode()
+for i in listLabel:
+    print(i)
