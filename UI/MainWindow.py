@@ -238,7 +238,7 @@ class PropertyEditWidget(QWidget):
         layout.addRow(self.permission_table)
         # self.permission_table.addItem('test')
         # self.attack_template_list.addItem('test')
-        layout.addRow(QLabel(self.tr(u"AttackTemplate")), btn_new)
+        layout.addRow(QLabel(self.tr(u"AttackTemplate")), self.btn_new)
         layout.addRow(self.attack_template_list)
         self.setLayout(layout)
 
