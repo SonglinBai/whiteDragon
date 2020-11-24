@@ -25,6 +25,14 @@ class Graph(object):
     def setName(self, name):
         self.name = name
 
+    def setNodeLabel(self, old, new):
+        node = self.getNodeByLabel(old)
+        if(self.getNodeByLabel(new)==None):
+            node.label = new
+            return True
+        else:
+            return False
+
     def setNodeList(self, nodeListOut: Optional[List[Node]]) -> bool:  # 添加新的结点
         for nodeOut in nodeListOut:
             for node in self.__nodeList:
@@ -80,7 +88,7 @@ class Graph(object):
         road.append(['nodeA', aAttempV0])
         self.CoreAlgorithm('%s'%startNode.label,road)
         for road in self.AllRoad.ListGroup:
-            road.head.data[0] =  ("%.2f" % road.head.data[0])#小数位截断
+            road.head.data[0] = ("%.2f" % road.head.data[0])#小数位截断
             if road.head.data[0] == 1:
                 self.AllRoad.ListGroup.remove(road)
 

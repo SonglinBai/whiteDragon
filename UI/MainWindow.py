@@ -1,16 +1,16 @@
 import sys
 
 from domain.Graph import *
-from Qt.QtCore import Qt, QPointF
+from Qt.QtCore import Qt, QPointF, Signal
 from PyQt5.QtCore import QVariant
 from Qt.QtGui import QIcon, QCursor
 from Qt.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
-                          QHBoxLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem,
-                          QAbstractItemView)
+                          QHBoxLayout, QVBoxLayout,QFormLayout,  QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem,
+                          QAbstractItemView, QLabel, QLineEdit, QComboBox, QPushButton)
 from UI.Nodz.nodz_main import Nodz
-from UI.QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
-from UI.QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
-from UI.QtPropertyBrowser.libqt5.pyqtcore import QMap, QList
+# from UI.QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
+# from UI.QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
+# from UI.QtPropertyBrowser.libqt5.pyqtcore import QMap, QList
 
 
 class MainWindow(QMainWindow):
@@ -125,7 +125,7 @@ class MainWindow(QMainWindow):
         self.nodz = Nodz(self)
         self.nodz.initialize()
 
-        self.PropertiesFrame = PropertyBrowserWidget(self)
+        self.PropertiesFrame = PropertyEditWidget(self)
 
         self.mainWidget.setLayout(self.mainLayout)
         sp = QSplitter(Qt.Vertical)
@@ -214,63 +214,60 @@ class ResultListWidget(QListWidget):
         print(item.text())
 
 
-class PropertyBrowserWidget(QtTreePropertyBrowser):
+class PropertyEditWidget(QWidget):
+    signal_LabelChanged = Signal(object, object)
+    signal_TypeChanged = Signal(object, object)
     def __init__(self, parent=None):
-        super(PropertyBrowserWidget, self).__init__(parent)
-        self.initData(parent)
+        super(PropertyEditWidget, self).__init__(parent)
+        self.node = None
+        self.initUI()
 
-    def initData(self, parent):
-        variantManager = QtVariantPropertyManager(parent)
+    def initUI(self):
+        layout = QFormLayout()
+        layout.setLabelAlignment(Qt.AlignLeft)
+        self.label_edit = QLineEdit()
+        self.type_select = QComboBox()
+        self.type_select.addItem(QIcon('UI/icon/pc.png'),'PC')
+        self.type_select.addItem(QIcon('UI/icon/server.png'),'Server')
+        self.permission_table = QListWidget()
+        self.btn_new = QPushButton(u'+')
+        self.attack_template_list = QListWidget()
+        layout.addRow(QLabel(self.tr(u"Label")), self.label_edit)
+        layout.addRow(QLabel(self.tr(u"Type")), self.type_select)
+        layout.addRow(QLabel(self.tr(u"Permisson")))
+        layout.addRow(self.permission_table)
+        # self.permission_table.addItem('test')
+        # self.attack_template_list.addItem('test')
+        layout.addRow(QLabel(self.tr(u"AttackTemplate")), btn_new)
+        layout.addRow(self.attack_template_list)
+        self.setLayout(layout)
 
-        topItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), self.tr(u'Node'))
+        self.label_edit.returnPressed.connect(self.labelHandler)
+        self.type_select.currentIndexChanged.connect(self.typeHandler)
 
-        labelItem = variantManager.addProperty(QVariant.String, self.tr(u'Label'))
-        topItem.addSubProperty(labelItem)
+    def loadNode(self, node):
+        self.node = node
+        self.label_edit.setText(node.label)
+        self.type_select.setCurrentIndex(node.type)
+        self.updatePermission(node)
 
-        # portItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(),"port")
+    def updatePermission(self, node):
+        table = node.permission.permissionTable
+        self.permission_table.clear()
+        for key in table.keys():
+            self.permission_table.addItem(key+" : "+str(table[key]))
 
-        """
-            add type selection item 
-        """
-        typeItem = variantManager.addProperty(QtVariantPropertyManager.enumTypeId(), self.tr(u'Type'))
+    def updateAttackTemplate(self, node):
+        pass
 
-        enumNames = QList()
-        enumNames.append("PC")
-        enumNames.append("Server")
+    def labelHandler(self):
+        self.signal_LabelChanged.emit(self.node.label, self.sender().text())
 
-        typeItem.setAttribute("enumNames", enumNames)
-        enumIcons = QMap()
-        enumIcons[0] = QIcon('UI/icon/pc.png')
-        enumIcons[1] = QIcon('UI/icon/server.png')
-        typeItem.setAttribute("enumIcons", enumIcons)
-
-        topItem.addSubProperty(typeItem)
-
-        """
-            add permission table
-        """
-        permissionItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), self.tr(u'Permission'))
-        # for i in range(10):
-        #     item = variantManager.addProperty(QVariant.String, "test")
-        #     item.setValue(i)
-        #     item.setAttribute("readOnly", True)
-        #     permissionItem.addSubProperty(item)
-        topItem.addSubProperty(permissionItem)
-
-        attempListItem = variantManager.addProperty(QtVariantPropertyManager.groupTypeId(), self.tr(u'Attack Templates'))
-        # for i in range(10):
-        #     item = variantManager.addProperty(QVariant.String, "label")
-        #     item.setValue("test"+str(i))
-        #     item.setAttribute("readOnly", True)
-        #     attempListItem.addSubProperty(item)
-        topItem.addSubProperty(attempListItem)
-
-        variantFactory = QtVariantEditorFactory(parent)
-
-        self.setFactoryForManager(variantManager, variantFactory)
-
-        self.addProperty(topItem)
-
+    def typeHandler(self, index):
+        if self.node == None or self.node.type == index:
+            return
+        else:
+            self.signal_TypeChanged.emit(self.node.label, index)
 
 class AttackTemplateWindow(QListWidget):
     def __init__(self,parent=None):
@@ -278,7 +275,6 @@ class AttackTemplateWindow(QListWidget):
         self.setWindowTitle(self.tr(u'Attack Templates'))
         self.setWindowIcon(QIcon('icon/network.png'))
         self.createContextMenu()
-        # self.itemClicked.connect(self.showClickedItem)
 
     def createContextMenu(self):
         self.setContextMenuPolicy(Qt.CustomContextMenu)
@@ -296,9 +292,6 @@ class AttackTemplateWindow(QListWidget):
         # 菜单显示前，将它移动到鼠标点击的位置
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
-
-    # def showClickedItem(self, item: QListWidgetItem):
-    #     print(item.text())
 
 
 if __name__ == "__main__":

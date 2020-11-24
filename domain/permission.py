@@ -16,4 +16,4 @@ class permission(object):
             "attackedRoadList": self.AttackedRoadList,
             "roadList": self.RoadList
         }
-
+        return data

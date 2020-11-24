@@ -4,11 +4,13 @@ from UI.MainWindow import MainWindow
 from domain.Graph import *
 from Qt import QtCore
 from Qt.QtGui import QIcon
-from Qt.QtWidgets import (QApplication, QFileDialog, QListWidgetItem)
+from Qt.QtWidgets import (QApplication, QFileDialog, QListWidgetItem, QMessageBox)
 import utils
 
 app = QApplication(sys.argv)
 app.setWindowIcon(QIcon("UI/icon/network.png"))
+
+# use zh_CN
 translator = QtCore.QTranslator()
 translator.load("./zh_CN.qm")
 app.installTranslator(translator)
@@ -64,13 +66,13 @@ def updateResult(result: List):
 
 # Nodes
 @QtCore.Slot(str)
-def on_nodeCreated(nodeName):
-    print('node created : ', nodeName)
+def on_nodeCreated(node):
+    print('node created : ', node.name)
     """
     1. 更新Graph
     2. 更新nodeListFrame
     """
-    node = Node(nodeName,0,[0,0],[],[])
+    node = Node(node.name,0,[node.x(),node.y()],[],[])
     graph.addNode(node)
     mainWindow.nodeListFrame.addNode(node)
 
@@ -88,10 +90,11 @@ def on_nodeEdited(nodeName, newName):
 
 @QtCore.Slot(str)
 def on_nodeSelected(node):
-    print(node)
-
-
-#  print('node selected : ', node)
+    # if select node propertiesFrame load node data
+    if(len(node)==1):
+        mainWindow.PropertiesFrame.loadNode(graph.getNodeByLabel(node[0].name))
+    else:
+        pass
 
 
 @QtCore.Slot(str, object)
@@ -104,7 +107,6 @@ def on_nodeMoved(nodeName, nodePos):
 @QtCore.Slot(str)
 def on_nodeDoubleClick(nodeName):
     print('double click on node : {0}'.format(nodeName))
-    mainWindow.attackTemplateWindow.show()
 
 
 # Attrs
@@ -191,6 +193,25 @@ def on_actOpenTriggered():
 def on_actRunTriggered():
     CaculateGraph(graph)
 
+@QtCore.Slot(str, str)
+def on_nodeLabelChanged(label, text):
+    if mainWindow.nodz.editNode(mainWindow.nodz.getNode(label), text) and graph.setNodeLabel(label, text):
+        print("change node label " + label+" to "+text)
+    elif label==text:
+        return
+    else:
+        QMessageBox.warning(mainWindow, mainWindow.tr(u'Error'), mainWindow.tr(u'The node already exists'))
+
+@QtCore.Slot(str, int)
+def on_nodeTypeChanged(label, type):
+    node = graph.getNodeByLabel(label)
+    if node.type == 0 or node.type == 1:
+        node.type = type
+        mainWindow.nodeListFrame.update(graph)
+        print("change node "+ label+ " type to "+str(type))
+    else:
+        QMessageBox.warning(mainWindow, mainWindow.tr(u'Error'), mainWindow.tr(u'The type does not exist'))
+
 mainWindow.actRun.triggered.connect(on_actRunTriggered)
 mainWindow.actSaveAs.triggered.connect(on_actSaveAsTriggered)
 mainWindow.actSave.triggered.connect(on_actSaveTriggered)
@@ -218,6 +239,9 @@ nodz.signal_GraphCleared.connect(on_graphCleared)
 nodz.signal_GraphEvaluated.connect(on_graphEvaluated)
 
 nodz.signal_KeyPressed.connect(on_keyPressed)
+
+mainWindow.PropertiesFrame.signal_LabelChanged.connect(on_nodeLabelChanged)
+mainWindow.PropertiesFrame.signal_TypeChanged.connect(on_nodeTypeChanged)
 
 # GraphA = Graph('GraphA')
 # #建立攻击模版

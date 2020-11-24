@@ -148,8 +148,8 @@ class Nodz(QtWidgets.QGraphicsView):
                 self.scene().addItem(nodeItem)
                 nodeItem.setPos(position - nodeItem.nodeCenter)
 
-                self.createAttribute(nodeItem,name='in',preset='attr_preset_3',dataType=str)
-                self.createAttribute(nodeItem,name='out',preset='attr_preset_3',dataType=str)
+                self.createAttribute(nodeItem,name='in',preset='attr_preset_3',plug=False,dataType=str)
+                self.createAttribute(nodeItem,name='out',preset='attr_preset_3',socket=False,dataType=str)
 
         connection = graph.AttackTable
         for source in connection.keys():
@@ -158,6 +158,8 @@ class Nodz(QtWidgets.QGraphicsView):
         self.scene().update()
         self.signal_GraphLoaded.emit()
 
+    def getNode(self, name):
+        return self.scene().nodes[name]
 
 
     def wheelEvent(self, event):
@@ -615,7 +617,7 @@ class Nodz(QtWidgets.QGraphicsView):
             nodeItem.setPos(position - nodeItem.nodeCenter)
 
             # Emit signal.
-            self.signal_NodeCreated.emit(name)
+            self.signal_NodeCreated.emit(nodeItem)
 
             return nodeItem
 
@@ -653,7 +655,7 @@ class Nodz(QtWidgets.QGraphicsView):
         if not node in self.scene().nodes.values():
             print('Node object does not exist !')
             print('Node edition aborted !')
-            return
+            return False
 
         oldName = node.name
 
@@ -662,7 +664,7 @@ class Nodz(QtWidgets.QGraphicsView):
             if newName in self.scene().nodes.keys():
                 print('A node with the same name already exists : {0}'.format(newName))
                 print('Node edition aborted !')
-                return
+                return False
             else:
                 node.name = newName
 
@@ -685,6 +687,7 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # Emit signal.
         self.signal_NodeEdited.emit(oldName, newName)
+        return True
 
     # ATTRS
     def createAttribute(self, node, name='default', index=-1, preset='attr_default', plug=True, socket=True,
@@ -906,86 +909,6 @@ class Nodz(QtWidgets.QGraphicsView):
 
         # Emit signal.
         self.signal_GraphSaved.emit()
-
-    # def loadGraph(self, filePath='path'):
-    #     """
-    #     Get all the stored info from the .json file at the given location
-    #     and recreate the graph as saved.
-    #
-    #     :type  filePath: str.
-    #     :param filePath: The path where you want to load your graph from.
-    #
-    #     """
-    #     # Load data.
-    #     if os.path.exists(filePath):
-    #         data = utils._loadData(filePath=filePath)
-    #     else:
-    #         print('Invalid path : {0}'.format(filePath))
-    #         print('Load aborted !')
-    #         return False
-    #
-    #     # Apply nodes data.
-    #     nodesData = data['NODES']
-    #     nodesName = nodesData.keys()
-    #
-    #     for name in nodesName:
-    #         preset = nodesData[name]['preset']
-    #         position = nodesData[name]['position']
-    #         position = QtCore.QPointF(position[0], position[1])
-    #         alternate = nodesData[name]['alternate']
-    #
-    #         node = self.createNode(name=name,
-    #                                preset=preset,
-    #                                position=position,
-    #                                alternate=alternate)
-    #
-    #         # Apply attributes data.
-    #         attrsData = nodesData[name]['attributes']
-    #
-    #         for attrData in attrsData:
-    #             index = attrsData.index(attrData)
-    #             name = attrData['name']
-    #             plug = attrData['plug']
-    #             socket = attrData['socket']
-    #             preset = attrData['preset']
-    #             dataType = attrData['dataType']
-    #             plugMaxConnections = attrData['plugMaxConnections']
-    #             socketMaxConnections = attrData['socketMaxConnections']
-    #
-    #             # un-serialize data type if needed
-    #             if (isinstance(dataType, str) and dataType.find('<') == 0):
-    #                 dataType = eval(str(dataType.split('\'')[1]))
-    #
-    #             self.createAttribute(node=node,
-    #                                  name=name,
-    #                                  index=index,
-    #                                  preset=preset,
-    #                                  plug=plug,
-    #                                  socket=socket,
-    #                                  dataType=dataType,
-    #                                  plugMaxConnections=plugMaxConnections,
-    #                                  socketMaxConnections=socketMaxConnections
-    #                                  )
-    #
-    #     # Apply connections data.
-    #     connectionsData = data['CONNECTIONS']
-    #
-    #     for connection in connectionsData:
-    #         source = connection[0]
-    #         sourceNode = source.split('.')[0]
-    #         sourceAttr = source.split('.')[1]
-    #
-    #         target = connection[1]
-    #         targetNode = target.split('.')[0]
-    #         targetAttr = target.split('.')[1]
-    #
-    #         self.createConnection(sourceNode, sourceAttr,
-    #                               targetNode, targetAttr)
-    #
-    #     self.scene().update()
-    #
-    #     # Emit signal.
-    #     self.signal_GraphLoaded.emit()
 
     def createConnection(self, sourceNode, sourceAttr, targetNode, targetAttr):
         """
