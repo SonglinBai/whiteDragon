@@ -53,14 +53,18 @@ class DoubleList(object):
             print('error')
             return False
         else:
-            for i in range(self.length):
+            for i in range(self.length-1):
                 if cur.data[0]==nodename:
-
-                    return prob
-                else:
-                    if cur.data[0]==cur.next.data[0]:
-                        cur = cur.next
+                    if cur.next != None:
+                        if cur.data[0] == cur.next.data[0]:
+                            cur = cur.next
                     else:
+                        prob = prob * cur.data[1].prob
+                        return prob
+                else:
+                    # if cur.data[0]==cur.next.data[0]:
+                    #     cur = cur.next
+                    # else:
                         prob = prob * cur.data[1].prob
                         cur = cur.next
 
