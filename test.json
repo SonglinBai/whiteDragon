@@ -1,172 +1,195 @@
 {
-    "NAME": "GraphA",
+    "NAME": "Untitled",
     "NODES": [
         {
             "label": "nodeA",
             "type": 0,
+            "position": [
+                577.0,
+                898.5
+            ],
             "port": [
                 8086
             ],
-            "attemp": [],
-            "position": [
-                118.34894976562492,
-                885.3738784687499
-            ]
+            "attemp": []
         },
         {
             "label": "nodeB",
             "type": 1,
+            "position": [
+                1278.0,
+                1017.5
+            ],
             "port": [
                 1123
             ],
             "attemp": [
-                {
-                    "label": "B(v0)",
-                    "vulneList": [
-                        "CVE-1"
-                    ],
-                    "requestPermission": 1,
-                    "prob": 0.5,
-                    "result": 1
-                },
-                {
-                    "label": "B(v1)",
-                    "vulneList": [
-                        "CVE-2"
-                    ],
-                    "requestPermission": 0,
-                    "prob": 0.2,
-                    "result": 1
-                }
-            ],
-            "position": [
-                545.0,
-                987.0
+                "B(v0)",
+                "B(v1)"
             ]
         },
         {
             "label": "nodeC",
             "type": 0,
+            "position": [
+                1078.0,
+                1192.5
+            ],
             "port": [
                 2222
             ],
             "attemp": [
-                {
-                    "label": "C(v0)",
-                    "vulneList": [
-                        "CVE-3"
-                    ],
-                    "requestPermission": 0,
-                    "prob": 0.1,
-                    "result": 1
-                },
-                {
-                    "label": "C(v1)",
-                    "vulneList": [
-                        "CVE-4"
-                    ],
-                    "requestPermission": 1,
-                    "prob": 0.3,
-                    "result": 2
-                },
-                {
-                    "label": "C(v2)",
-                    "vulneList": [
-                        "CVE-5"
-                    ],
-                    "requestPermission": 2,
-                    "prob": 0.7,
-                    "result": 3
-                }
-            ],
-            "position": [
-                802.0,
-                1181.0
+                "C(v0)",
+                "C(v1)",
+                "C(v2)"
             ]
         },
         {
             "label": "nodeD",
             "type": 1,
+            "position": [
+                853.0,
+                1168.5
+            ],
             "port": [
                 2231
             ],
             "attemp": [
-                {
-                    "label": "D(v0)",
-                    "vulneList": [
-                        "CVE-6"
-                    ],
-                    "requestPermission": 0,
-                    "prob": 0.4,
-                    "result": 0
-                }
-            ],
-            "position": [
-                645.0,
-                783.0
+                "D(v0)"
             ]
         },
         {
             "label": "nodeE",
             "type": 1,
+            "position": [
+                1227.0,
+                857.5
+            ],
             "port": [
                 3112
             ],
             "attemp": [
-                {
-                    "label": "E(v0)",
-                    "vulneList": [
-                        "CVE-7"
-                    ],
-                    "requestPermission": 0,
-                    "prob": 0.2,
-                    "result": 0
-                }
-            ],
-            "position": [
-                1041.0,
-                982.0
+                "E(v0)"
             ]
         },
         {
             "label": "nodeF",
-            "type": 2,
+            "type": 1,
+            "position": [
+                817.0,
+                757.5
+            ],
             "port": [
                 4445
             ],
             "attemp": [
-                {
-                    "label": "F(v0)",
-                    "vulneList": [
-                        "CVE-8"
-                    ],
-                    "requestPermission": 0,
-                    "prob": 0.9,
-                    "result": 0
-                }
-            ],
-            "position": [
-                1360.0,
-                806.0
+                "F(v0)"
             ]
         }
     ],
     "CONNECTION": {
-        "nodeA": [],
+        "nodeA": [
+            "nodeB",
+            "nodeC",
+            "nodeD"
+        ],
         "nodeB": [
-            "nodeE",
-            "nodeC"
+            "nodeC",
+            "nodeE"
         ],
         "nodeC": [
             "nodeE"
         ],
         "nodeD": [
-            "nodeF",
-            "nodeC"
+            "nodeC",
+            "nodeF"
         ],
         "nodeE": [
             "nodeF"
         ],
         "nodeF": []
-    }
+    },
+    "ATTACKTEMPLATE": [
+        {
+            "label": "StartPoint",
+            "vulneList": [
+                "Strat"
+            ],
+            "requestPermission": 0,
+            "prob": 1,
+            "result": 0
+        },
+        {
+            "label": "B(v0)",
+            "vulneList": [
+                "CVE-1"
+            ],
+            "requestPermission": 1,
+            "prob": 0.5,
+            "result": 1
+        },
+        {
+            "label": "B(v1)",
+            "vulneList": [
+                "CVE-2"
+            ],
+            "requestPermission": 0,
+            "prob": 0.2,
+            "result": 1
+        },
+        {
+            "label": "C(v0)",
+            "vulneList": [
+                "CVE-3"
+            ],
+            "requestPermission": 0,
+            "prob": 0.1,
+            "result": 1
+        },
+        {
+            "label": "C(v1)",
+            "vulneList": [
+                "CVE-4"
+            ],
+            "requestPermission": 1,
+            "prob": 0.3,
+            "result": 2
+        },
+        {
+            "label": "C(v2)",
+            "vulneList": [
+                "CVE-5"
+            ],
+            "requestPermission": 2,
+            "prob": 0.7,
+            "result": 3
+        },
+        {
+            "label": "D(v0)",
+            "vulneList": [
+                "CVE-6"
+            ],
+            "requestPermission": 0,
+            "prob": 0.4,
+            "result": 0
+        },
+        {
+            "label": "E(v0)",
+            "vulneList": [
+                "CVE-7"
+            ],
+            "requestPermission": 0,
+            "prob": 0.2,
+            "result": 0
+        },
+        {
+            "label": "F(v0)",
+            "vulneList": [
+                "CVE-8"
+            ],
+            "requestPermission": 0,
+            "prob": 0.9,
+            "result": 0
+        }
+    ]
 }

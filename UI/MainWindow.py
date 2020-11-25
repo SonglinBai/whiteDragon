@@ -5,9 +5,12 @@ from Qt.QtCore import Qt, QPointF, Signal
 from PyQt5.QtCore import QVariant
 from Qt.QtGui import QIcon, QCursor
 from Qt.QtWidgets import (QAction, QApplication, QDesktopWidget, QFrame,
-                          QHBoxLayout, QVBoxLayout,QFormLayout,  QMainWindow, QMenu, QSplitter, QWidget, QListWidget, QListWidgetItem,
-                          QAbstractItemView, QLabel, QLineEdit, QComboBox, QPushButton)
+                          QHBoxLayout, QVBoxLayout, QFormLayout, QMainWindow, QMenu, QSplitter, QWidget, QListWidget,
+                          QListWidgetItem,
+                          QAbstractItemView, QLabel, QLineEdit, QComboBox, QPushButton, QDialog, QDialogButtonBox)
 from UI.Nodz.nodz_main import Nodz
+
+
 # from UI.QtPropertyBrowser.QtProperty.qtvariantproperty import QtVariantPropertyManager, QtVariantEditorFactory
 # from UI.QtPropertyBrowser.QtProperty.qttreepropertybrowser import QtTreePropertyBrowser
 # from UI.QtPropertyBrowser.libqt5.pyqtcore import QMap, QList
@@ -120,8 +123,6 @@ class MainWindow(QMainWindow):
         self.resultFrame = ResultListWidget(self)
         self.resultFrame.setFrameShape(QFrame.StyledPanel)
 
-        self.attackTemplateWindow = AttackTemplateWindow(self)
-
         self.nodz = Nodz(self)
         self.nodz.initialize()
 
@@ -149,14 +150,14 @@ class MainWindow(QMainWindow):
         for item in items:
             self.nodz.scene().nodes[item.text()].setSelected(True)
 
-    def loadGraph(self, graph:Graph):
+    def loadGraph(self, graph: Graph):
         # 清空节点列表,清空nodz图
         self.nodeListFrame.update(graph)
         self.nodz.loadGraph(graph)
 
 
 class NodeListWidget(QListWidget):
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(NodeListWidget, self).__init__(parent)
         self.createContextMenu()
 
@@ -177,11 +178,11 @@ class NodeListWidget(QListWidget):
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
 
-    def addNode(self, node:Node):
-        icon = ['UI/icon/pc.png','UI/icon/server.png']
+    def addNode(self, node: Node):
+        icon = ['UI/icon/pc.png', 'UI/icon/server.png']
         self.addItem(QListWidgetItem(QIcon(icon[node.type]), node.label))
 
-    def update(self, graph:Graph):
+    def update(self, graph: Graph):
         self.clear()
         for node in graph.ShowNodeList():
             self.addNode(node)
@@ -217,6 +218,9 @@ class ResultListWidget(QListWidget):
 class PropertyEditWidget(QWidget):
     signal_LabelChanged = Signal(object, object)
     signal_TypeChanged = Signal(object, object)
+    signal_addAttemp = Signal(object)
+    signal_rmAttemp = Signal(object, object)
+
     def __init__(self, parent=None):
         super(PropertyEditWidget, self).__init__(parent)
         self.node = None
@@ -227,10 +231,11 @@ class PropertyEditWidget(QWidget):
         layout.setLabelAlignment(Qt.AlignLeft)
         self.label_edit = QLineEdit()
         self.type_select = QComboBox()
-        self.type_select.addItem(QIcon('UI/icon/pc.png'),'PC')
-        self.type_select.addItem(QIcon('UI/icon/server.png'),'Server')
+        self.type_select.addItem(QIcon('UI/icon/pc.png'), 'PC')
+        self.type_select.addItem(QIcon('UI/icon/server.png'), 'Server')
         self.permission_table = QListWidget()
-        self.btn_new = QPushButton(u'+')
+        self.btn_add = QPushButton(u'+')
+        self.btn_rm = QPushButton(u'-')
         self.attack_template_list = QListWidget()
         layout.addRow(QLabel(self.tr(u"Label")), self.label_edit)
         layout.addRow(QLabel(self.tr(u"Type")), self.type_select)
@@ -238,27 +243,34 @@ class PropertyEditWidget(QWidget):
         layout.addRow(self.permission_table)
         # self.permission_table.addItem('test')
         # self.attack_template_list.addItem('test')
-        layout.addRow(QLabel(self.tr(u"AttackTemplate")), self.btn_new)
+        layout.addRow(QLabel(self.tr(u"AttackTemplate")))
+        layout.addRow(self.btn_add, self.btn_rm)
         layout.addRow(self.attack_template_list)
         self.setLayout(layout)
 
         self.label_edit.returnPressed.connect(self.labelHandler)
         self.type_select.currentIndexChanged.connect(self.typeHandler)
+        self.btn_add.clicked.connect(self.addAttemp)
+        self.btn_rm.clicked.connect(self.rmAttemp)
 
     def loadNode(self, node):
         self.node = node
         self.label_edit.setText(node.label)
         self.type_select.setCurrentIndex(node.type)
         self.updatePermission(node)
+        self.updateAttackTemplate(node)
 
     def updatePermission(self, node):
         table = node.permission.permissionTable
         self.permission_table.clear()
         for key in table.keys():
-            self.permission_table.addItem(key+" : "+str(table[key]))
+            self.permission_table.addItem(key + " : " + str(table[key]))
 
     def updateAttackTemplate(self, node):
-        pass
+        list = node.Attemp
+        self.attack_template_list.clear()
+        for a in list:
+            self.attack_template_list.addItem(a);
 
     def labelHandler(self):
         self.signal_LabelChanged.emit(self.node.label, self.sender().text())
@@ -269,8 +281,24 @@ class PropertyEditWidget(QWidget):
         else:
             self.signal_TypeChanged.emit(self.node.label, index)
 
+    def addAttemp(self):
+        if self.node == None:
+            return
+        else:
+            self.signal_addAttemp.emit(self.node.label)
+
+    def rmAttemp(self):
+        if self.node == None or len(self.attack_template_list.selectedItems()) == 0:
+            return
+        else:
+            texts = []
+            for item in self.attack_template_list.selectedItems():
+                texts.append(item.text())
+            self.signal_rmAttemp.emit(self.node.label, texts)
+
+
 class AttackTemplateWindow(QListWidget):
-    def __init__(self,parent=None):
+    def __init__(self, parent=None):
         super(AttackTemplateWindow, self).__init__(parent)
         self.setWindowTitle(self.tr(u'Attack Templates'))
         self.setWindowIcon(QIcon('icon/network.png'))
@@ -292,6 +320,35 @@ class AttackTemplateWindow(QListWidget):
         # 菜单显示前，将它移动到鼠标点击的位置
         self.contextMenu.move(QCursor().pos())
         self.contextMenu.show()
+
+
+class selectAttempDialog(QDialog):
+    def __init__(self, parent=None):
+        super(selectAttempDialog, self).__init__(parent)
+        self.initUI()
+
+    def initUI(self):
+        self.resize(100, 70)
+        self.setWindowTitle(self.tr(u"select one AttackTemplate"))
+        layout = QVBoxLayout()
+        self.selectComboBox = QComboBox(self)
+
+        buttonBox = QDialogButtonBox(parent=self)
+        buttonBox.setOrientation(Qt.Horizontal)  # 设置为水平方向
+        buttonBox.setStandardButtons(QDialogButtonBox.Cancel | QDialogButtonBox.Ok)  # 确定和取消两个按钮
+
+        buttonBox.accepted.connect(self.accept)  # 确定
+        buttonBox.rejected.connect(self.reject)  # 取消
+
+        layout.addWidget(self.selectComboBox)
+        layout.addWidget(buttonBox)
+        self.setLayout(layout)
+
+    def updateComboBox(self, att: List[Attemp]):
+        self.selectComboBox.clear()
+        if att != None:
+            for a in att:
+                self.selectComboBox.addItem(a.label)
 
 
 if __name__ == "__main__":

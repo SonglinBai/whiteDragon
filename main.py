@@ -1,6 +1,6 @@
 import sys
 import os
-from UI.MainWindow import MainWindow
+from UI.MainWindow import MainWindow, AttackTemplateWindow, selectAttempDialog
 from domain.Graph import *
 from Qt import QtCore
 from Qt.QtGui import QIcon
@@ -16,10 +16,13 @@ translator.load("./zh_CN.qm")
 app.installTranslator(translator)
 mainWindow = MainWindow()
 
-nodz = mainWindow.nodz
-
 filePath = ""
 graph = Graph('Untitled')
+
+attackTemplateWindow = AttackTemplateWindow()
+selectDialog = selectAttempDialog(mainWindow)
+
+nodz = mainWindow.nodz
 
 
 def saveGraph(graph: Graph, filePath):
@@ -39,8 +42,7 @@ def saveGraph(graph: Graph, filePath):
         return False
 
 
-def loadGraph(graph: Graph,filePath):
-
+def loadGraph(graph: Graph, filePath):
     """
         从json文件中载入
     """
@@ -54,9 +56,11 @@ def loadGraph(graph: Graph,filePath):
     graph.loadGraph(data)
     mainWindow.loadGraph(graph)
 
+
 def CaculateGraph(graph):
     graph.calculateAttackProb(graph.getNodeByLabel('nodeA'))
     updateResult(graph.AllRoad.ListGroup)
+
 
 def updateResult(result: List):
     mainWindow.resultFrame.clear()
@@ -72,9 +76,10 @@ def on_nodeCreated(node):
     1. 更新Graph
     2. 更新nodeListFrame
     """
-    node = Node(node.name,0,[node.x(),node.y()],[],[])
+    node = Node(node.name, 0, [node.x(), node.y()], [], [])
     graph.addNode(node)
     mainWindow.nodeListFrame.addNode(node)
+
 
 @QtCore.Slot(str)
 def on_nodeDeleted(nodeName):
@@ -91,7 +96,7 @@ def on_nodeEdited(nodeName, newName):
 @QtCore.Slot(str)
 def on_nodeSelected(node):
     # if select node propertiesFrame load node data
-    if(len(node)==1):
+    if (len(node) == 1):
         mainWindow.PropertiesFrame.loadNode(graph.getNodeByLabel(node[0].name))
     else:
         pass
@@ -101,7 +106,7 @@ def on_nodeSelected(node):
 def on_nodeMoved(nodeName, nodePos):
     print('node {0} moved to {1}'.format(nodeName, nodePos))
 
-    graph.move(nodeName, [nodePos.x(),nodePos.y()])
+    graph.move(nodeName, [nodePos.x(), nodePos.y()])
 
 
 @QtCore.Slot(str)
@@ -179,7 +184,7 @@ def on_actSaveAsTriggered():
     filePath = QFileDialog.getSaveFileName(mainWindow, mainWindow.tr('Save'), os.path.dirname(filePath),
                                            mainWindow.tr('Json files (*.json)'))[0]
 
-    saveGraph(graph,filePath)
+    saveGraph(graph, filePath)
 
 
 @QtCore.Slot()
@@ -187,20 +192,23 @@ def on_actOpenTriggered():
     global filePath
     filePath = QFileDialog.getOpenFileName(mainWindow, mainWindow.tr('Open'), os.path.dirname(filePath),
                                            mainWindow.tr('Json files (*.json)'))[0]
-    loadGraph(graph,filePath)
+    loadGraph(graph, filePath)
+
 
 @QtCore.Slot()
 def on_actRunTriggered():
     CaculateGraph(graph)
 
+
 @QtCore.Slot(str, str)
 def on_nodeLabelChanged(label, text):
     if mainWindow.nodz.editNode(mainWindow.nodz.getNode(label), text) and graph.setNodeLabel(label, text):
-        print("change node label " + label+" to "+text)
-    elif label==text:
+        print("change node label " + label + " to " + text)
+    elif label == text:
         return
     else:
         QMessageBox.warning(mainWindow, mainWindow.tr(u'Error'), mainWindow.tr(u'The node already exists'))
+
 
 @QtCore.Slot(str, int)
 def on_nodeTypeChanged(label, type):
@@ -208,9 +216,35 @@ def on_nodeTypeChanged(label, type):
     if node.type == 0 or node.type == 1:
         node.type = type
         mainWindow.nodeListFrame.update(graph)
-        print("change node "+ label+ " type to "+str(type))
+        print("change node " + label + " type to " + str(type))
     else:
         QMessageBox.warning(mainWindow, mainWindow.tr(u'Error'), mainWindow.tr(u'The type does not exist'))
+
+
+@QtCore.Slot(str)
+def on_addAttemp(label):
+    node = graph.getNodeByLabel(label)
+    selectDialog.updateComboBox(graph.attempList)
+    if selectDialog.exec_():
+        text = selectDialog.selectComboBox.currentText()
+        node.Attemp.append(text)
+        mainWindow.PropertiesFrame.updateAttackTemplate(node)
+    else:
+        return
+
+
+@QtCore.Slot(str, list)
+def on_rmAttemp(label, att):
+    ret = QMessageBox.warning(mainWindow, mainWindow.tr(u'Warning'), mainWindow.tr(
+        u'Are you sure you want to delete these ' + str(len(att)) + ' attack templates'))
+    if ret:
+        node = graph.getNodeByLabel(label)
+        for i in att:
+            node.Attemp.remove(i)
+        mainWindow.PropertiesFrame.updateAttackTemplate(node)
+    else:
+        return
+
 
 mainWindow.actRun.triggered.connect(on_actRunTriggered)
 mainWindow.actSaveAs.triggered.connect(on_actSaveAsTriggered)
@@ -242,9 +276,13 @@ nodz.signal_KeyPressed.connect(on_keyPressed)
 
 mainWindow.PropertiesFrame.signal_LabelChanged.connect(on_nodeLabelChanged)
 mainWindow.PropertiesFrame.signal_TypeChanged.connect(on_nodeTypeChanged)
+mainWindow.PropertiesFrame.signal_addAttemp.connect(on_addAttemp)
+mainWindow.PropertiesFrame.signal_rmAttemp.connect(on_rmAttemp)
 
+# #以下为测试数据
 # GraphA = Graph('GraphA')
 # #建立攻击模版
+# aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
 # bAttempV0 = Attemp('B(v0)', ['CVE-1'], 1, 1, 0.5)
 # bAttempV1 = Attemp('B(v1)', ['CVE-2'], 0, 1, 0.2)
 # cAttempV0 = Attemp('C(v0)', ['CVE-3'], 0, 1, 0.1)
@@ -254,44 +292,28 @@ mainWindow.PropertiesFrame.signal_TypeChanged.connect(on_nodeTypeChanged)
 # eAttempV0 = Attemp('E(v0)', ['CVE-7'], 0, 0, 0.2)
 # fAttempV0 = Attemp('F(v0)', ['CVE-8'], 0, 0, 0.9)
 #
+# GraphA.attempList = [aAttempV0,bAttempV0,bAttempV1,cAttempV0,cAttempV1,cAttempV2,dAttempV0,eAttempV0,fAttempV0]
+#
 # #建立点：
-# Anode = Node('nodeA',0,[8086],[])
-# Bnode = Node('nodeB',1,[1123],[bAttempV0,bAttempV1])
-# Cnode = Node('nodeC',0,[2222],[cAttempV0,cAttempV1,cAttempV2])
-# Dnode = Node('nodeD',1,[2231],[dAttempV0])
-# Enode = Node('nodeE',1,[3112],[eAttempV0])
-# Fnode = Node('nodeF',1,[4445],[fAttempV0])
+# Anode = Node('nodeA',0,[],[8086],[])
+# Bnode = Node('nodeB',1,[],[1123],['B(v0)','B(v1)'])
+# Cnode = Node('nodeC',0,[],[2222],['C(v0)','C(v1)','C(v2)'])
+# Dnode = Node('nodeD',1,[],[2231],['D(v0)'])
+# Enode = Node('nodeE',1,[],[3112],['E(v0)'])
+# Fnode = Node('nodeF',1,[],[4445],['F(v0)'])
 # GraphA.setNodeList([Anode,Bnode,Cnode,Dnode,Enode,Fnode])
 #
 # #建立邻接多重表
 # GraphA.AttackTable = {
-#     Anode:[Bnode,Cnode,Dnode],
-#     Bnode:[Cnode,Enode],
-#     Cnode:[Enode],
-#     Dnode:[Cnode,Fnode],
-#     Enode:[Fnode],
-#     Fnode:[]
+#     'nodeA':['nodeB','nodeC','nodeD'],
+#     'nodeB':['nodeC','nodeE'],
+#     'nodeC':['nodeE'],
+#     'nodeD':['nodeC','nodeF'],
+#     'nodeE':['nodeF'],
+#     'nodeF':[]
 # }
-# nodz.createNode('nodeA')
-# nodz.createNode('nodeB')
-# nodz.createNode('nodeC')
-# nodz.createNode('nodeD')
-# nodz.createNode('nodeE')
-# nodz.createNode('nodeF')
-# saveGraph(GraphA, "./test.json")
+# saveGraph(GraphA, "test.json")
 
-# loadGraph("./test.json")
-#
-# aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
-#
-# road = DoubleList()
-# Anode = graph.getNodeByLabel('nodeA')
-# road.append([Anode,aAttempV0])
-# graph.CoreAlgorithm(Anode, road)
-# for i in graph.AllRoad.ListGroup:
-#     i.travel()
-#     print(i.head.data[0])
-
-loadGraph(graph, "./test2.json")
+loadGraph(graph, "./test.json")
 
 sys.exit(app.exec_())

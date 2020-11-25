@@ -14,16 +14,15 @@ class Node(object):
 
 
     def toJson(self):
+        if len(self.position) != 2:
+            self.position=[0,0]
         data = {
             "label": self.label,
             "type": self.type,
             "position": self.position,
             "port": self.port,
-            "attemp": [],
+            "attemp": self.Attemp,
         }
-        for attemp in self.Attemp:
-            data["attemp"].append(attemp.toJson())
-
         return data
 
 

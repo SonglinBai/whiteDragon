@@ -20,7 +20,7 @@ class Graph(object):
         self.__nodeNum: int = 0  # 结点的计数
         self.AttackTable = {}  # 攻击路径的邻接表
         self.AllRoad = AllListGroup()  # 结果列表
-        self.attempList = []
+        self.attempList = []  # 攻击模版
         self.signal = 0  # 标记位（总会有用的）
 
     def setName(self, name):
@@ -28,7 +28,7 @@ class Graph(object):
 
     def setNodeLabel(self, old, new):
         node = self.getNodeByLabel(old)
-        if(self.getNodeByLabel(new)==None):
+        if (self.getNodeByLabel(new) == None):
             node.label = new
             return True
         else:
@@ -46,25 +46,25 @@ class Graph(object):
 
         return True
 
-    def addNode(self, node:Node):
+    def addNode(self, node: Node):
         if not self.getNodeByLabel(node.label):
             self.__nodeList.append(node)
         else:
-            print("Can't add Node: Node"+node.label+"exist already")
+            print("Can't add Node: Node" + node.label + "exist already")
 
-    def delNodes(self, labels:List):
+    def delNodes(self, labels: List):
         for label in labels:
             self.delNode(label)
 
-    def delNode(self, label:str):
+    def delNode(self, label: str):
         node = self.getNodeByLabel(label)
         if node is not None:
             self.__nodeList.remove(node)
         else:
-            print("Can't del Node: Node"+label+"don't exist")
+            print("Can't del Node: Node" + label + "don't exist")
             return
 
-    def move(self, node:str, positon:List):
+    def move(self, node: str, positon: List):
         node = self.getNodeByLabel(node)
 
         node.position = positon
@@ -79,24 +79,21 @@ class Graph(object):
         # print(self.__nodeNum)
         return self.__nodeNum
 
-
-    def calculateAttackProb(self,startNode:Node):
-        self.AllRoad.ListGroup.clear()#重新置为零
+    def calculateAttackProb(self, startNode: Node):
+        self.AllRoad.ListGroup.clear()  # 重新置为零
         self.AllRoad.ListNumber = 0
         attackTabelCopy = copy.deepcopy(self.AttackTable)
         road = DoubleList()
-        aAttempV0 = Attemp('StartPoint',['Strat'],0,0,1)
+        aAttempV0 = Attemp('StartPoint', ['Strat'], 0, 0, 1)
         road.append(['nodeA', aAttempV0])
-        self.CoreAlgorithm('%s'%startNode.label,road)
+        self.CoreAlgorithm('%s' % startNode.label, road)
         for road in self.AllRoad.ListGroup:
-            road.head.data[0] = ("%.2f" % road.head.data[0])#小数位截断
+            road.head.data[0] = ("%.2f" % road.head.data[0])  # 小数位截断
             if road.head.data[0] == 1:
                 self.AllRoad.ListGroup.remove(road)
 
         self.AttackTable = attackTabelCopy
         self.AllRoad.ListNumber = len(self.AllRoad.ListGroup)
-
-
 
     def CreatePermissionTable(self, OriginNode: Node, TargetNode: Node, PerLevel: int) -> bool:  # 创造权限
         if (OriginNode in self.__nodeList) == True and (TargetNode in self.__nodeList) == True:
@@ -108,7 +105,6 @@ class Graph(object):
 
     def ShowNodeList(self):  # 返回结点的列表
         return copy.deepcopy(self.__nodeList)
-
 
     def checkNode(self, OutNode: Node) -> bool:  # 判断结点是否在图中
         if (OutNode.label in self.allNodeLabel) == True:
@@ -123,12 +119,13 @@ class Graph(object):
             if node.label == OutNode.label:
                 return node
 
-    def checkNodeByLabel(self,outNode:str) ->bool:
-        if (outNode in self.allNodeLabel )== True:
+    def checkNodeByLabel(self, outNode: str) -> bool:
+        if (outNode in self.allNodeLabel) == True:
             return True
         else:
             return False
-    def getAttempByLabel(self,attempLabel:str):
+
+    def getAttempByLabel(self, attempLabel: str):
         for attemp in self.attempList:
             if attemp.label == attempLabel:
                 return attemp
@@ -194,7 +191,7 @@ class Graph(object):
         AttackPerLevel = AttackNode.permission.permissionTable['%s' % (AttackedNode.label)]  # 得到攻击结点拥有的权限
         for attemp in AttackedNode.Attemp:  # 遍历
             AttempRoad = self.getAttempByLabel(attemp)
-            #print(AttempRoad)
+            # print(AttempRoad)
             if AttempRoad.requestPermission == AttackPerLevel:
                 if RoadList.findBlock(AttempRoad) != False:
                     return False
@@ -217,25 +214,29 @@ class Graph(object):
             i += 1
             for road in self.AllRoad.ListGroup:
                 m = road.calculateNodeProb(node.label)
-                #print(m)
+                # print(m)
                 if m != None:
                     listLabel[i] = listLabel[i] + m
 
         return listLabel
 
-
-
+    def setAttackTemplate(self, list):
+        self.attempList = list
 
     def toJson(self):
         connection = dict()
         for cn in self.AttackTable.keys():
-            connection[cn.label] = []
+            connection[cn] = []
             for node in self.AttackTable[cn]:
-                connection[cn.label].append(node.label)
+                connection[cn].append(node)
+        attack_templates = []
+        for att in self.attempList:
+            attack_templates.append(att.toJson())
         data = {
             "NAME": self.name,
             "NODES": [],
-            "CONNECTION": connection
+            "CONNECTION": connection,
+            "ATTACKTEMPLATE": attack_templates
         }
         for node in self.__nodeList:
             data["NODES"].append(node.toJson())
@@ -261,15 +262,15 @@ class Graph(object):
             port = node['port']
             attemp = node['attemp']
             position = node['position']
-
-            attempList = []
-            # 遍历攻击模板
-            for a in attemp:
-                attempList.append(Attemp(a['label'], a['vulneList'], a['requestPermission'],
-                                         a['result'], a['prob']))
-            nodes.append(Node(label, type, position, port, attempList))
-
+            nodes.append(Node(label, type, position, port, attemp))
         self.setNodeList(nodes)
+        attempList = []
+        attData = data["ATTACKTEMPLATE"]
+
+        for a in attData:
+            attempList.append(Attemp(a['label'], a['vulneList'], a['requestPermission'],
+                                     a['result'], a['prob']))
+        self.setAttackTemplate(attempList)
 
         connectionData = data['CONNECTION']
         self.AttackTable = dict()
